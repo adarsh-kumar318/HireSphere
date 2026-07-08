@@ -1,13 +1,15 @@
-import AppRoutes from "./routes/AppRoutes";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "react-hot-toast/dist/index.css";
+import App from "./App";
 
-function App() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-blue-600">
-      <h1 className="text-5xl font-bold text-white">
-        Placement Management
-      </h1>
-    </div>
-  );
-}
-
-export default App;
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>
+);
