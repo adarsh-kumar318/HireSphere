@@ -1,0 +1,150 @@
+:root {
+  --pm-primary: #2457c5;
+  --pm-primary-dark: #173f91;
+  --pm-accent: #0f9f8f;
+  --pm-warning: #e6a12a;
+  --pm-danger: #d94d45;
+  --pm-ink: #172033;
+  --pm-muted: #687182;
+  --pm-border: #dfe4ec;
+  --pm-soft: #f4f7fb;
+  --pm-panel: #ffffff;
+  --pm-sidebar: #11243d;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--pm-ink);
+  background: var(--pm-soft);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--pm-soft);
+}
+
+a {
+  color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--pm-primary);
+  --bs-btn-border-color: var(--pm-primary);
+  --bs-btn-hover-bg: var(--pm-primary-dark);
+  --bs-btn-hover-border-color: var(--pm-primary-dark);
+}
+
+.text-primary {
+  color: var(--pm-primary) !important;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--pm-soft);
+}
+
+.app-sidebar {
+  width: 280px;
+  min-height: 100vh;
+  background: var(--pm-sidebar);
+  color: #eef4ff;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #c9d5ea;
+  border-radius: 6px;
+  padding: 0.72rem 0.85rem;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.content-area {
+  min-width: 0;
+}
+
+.topbar {
+  min-height: 68px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--pm-border);
+}
+
+.page-title {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.card {
+  border-color: var(--pm-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(23, 32, 51, 0.04);
+}
+
+.metric-card {
+  min-height: 132px;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(135deg, rgba(36, 87, 197, 0.95), rgba(15, 159, 143, 0.9)),
+    url("./assets/hero.png") center/220px repeat;
+}
+
+.auth-panel {
+  width: min(100%, 460px);
+  border-radius: 8px;
+}
+
+.table > :not(caption) > * > * {
+  vertical-align: middle;
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--pm-ink);
+}
+
+.empty-state {
+  border: 1px dashed var(--pm-border);
+  background: #fff;
+  border-radius: 8px;
+}
+
+.avatar-circle {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e9f0ff;
+  color: var(--pm-primary);
+  font-weight: 700;
+}
+
+@media (max-width: 991.98px) {
+  .app-sidebar {
+    width: 100%;
+    min-height: auto;
+    position: static;
+  }
+}
