@@ -1,16 +1,9 @@
-function LoadingSpinner({ fullPage = false, text = 'Loading...' }) {
-  const className = fullPage
-    ? 'min-vh-100 d-flex align-items-center justify-content-center'
-    : 'd-flex align-items-center justify-content-center py-5'
-
+const LoadingSpinner = () => {
   return (
-    <div className={className}>
-      <div className="text-center">
-        <div className="spinner-border text-primary" role="status" aria-hidden="true" />
-        <p className="mt-3 mb-0 text-secondary">{text}</p>
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
     </div>
-  )
-}
+  );
+};
 
-export default LoadingSpinner
+export default LoadingSpinner;

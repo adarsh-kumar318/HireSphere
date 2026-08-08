@@ -2,18 +2,13 @@ const express = require("express");
 const router = express.Router();
 const roleMiddleware = require("../middleware/roleMiddleware");
 const authMiddleware = require("../middleware/authMiddleware");
-
-router.get("/profile", authMiddleware, (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Profile Access Granted",
-    user: req.user,
-  });
-});
 const {
   getProfile,
   updateProfile,
 } = require("../controllers/userController");
+
+router.get("/profile", authMiddleware, getProfile);
+router.put("/profile", authMiddleware, updateProfile);
 //admin//
 router.get(
   "/admin",

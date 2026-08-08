@@ -1,150 +1,134 @@
+@import "tailwindcss";
+
+/* ============================================================
+   SkillSphere Design System — Global CSS
+   Brand tokens, typography, utilities, animations
+   ============================================================ */
+
 :root {
-  --pm-primary: #2457c5;
-  --pm-primary-dark: #173f91;
-  --pm-accent: #0f9f8f;
-  --pm-warning: #e6a12a;
-  --pm-danger: #d94d45;
-  --pm-ink: #172033;
-  --pm-muted: #687182;
-  --pm-border: #dfe4ec;
-  --pm-soft: #f4f7fb;
-  --pm-panel: #ffffff;
-  --pm-sidebar: #11243d;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: var(--pm-ink);
-  background: var(--pm-soft);
+  --ss-primary: #4F46E5;
+  --ss-primary-dark: #3730A3;
+  --ss-secondary: #06B6D4;
+  --ss-success: #22C55E;
+  --ss-bg: #0F172A;
+  --ss-surface: #1E293B;
+  --ss-border: #334155;
+  --ss-text: #F8FAFC;
+  --ss-muted: #94A3B8;
+
+  font-family: 'Inter', 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--ss-text);
+  background: var(--ss-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--pm-soft);
-}
-
-a {
-  color: inherit;
 }
 
 #root {
   min-height: 100vh;
 }
 
-.btn-primary {
-  --bs-btn-bg: var(--pm-primary);
-  --bs-btn-border-color: var(--pm-primary);
-  --bs-btn-hover-bg: var(--pm-primary-dark);
-  --bs-btn-hover-border-color: var(--pm-primary-dark);
-}
-
-.text-primary {
-  color: var(--pm-primary) !important;
-}
-
-.app-shell {
-  min-height: 100vh;
-  background: var(--pm-soft);
-}
-
-.app-sidebar {
-  width: 280px;
-  min-height: 100vh;
-  background: var(--pm-sidebar);
-  color: #eef4ff;
-  position: sticky;
-  top: 0;
-}
-
-.sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #c9d5ea;
-  border-radius: 6px;
-  padding: 0.72rem 0.85rem;
+a {
+  color: inherit;
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.sidebar-link:hover,
-.sidebar-link.active {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+/* ─── Typography ─────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--ss-primary) 0%, var(--ss-secondary) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.content-area {
-  min-width: 0;
+/* ─── Buttons ────────────────────────────────────────────── */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98];
 }
 
-.topbar {
-  min-height: 68px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--pm-border);
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-[#334155] bg-[#1E293B] px-5 py-2.5 text-sm font-semibold text-slate-200 transition-all duration-200 hover:border-indigo-500/40 hover:bg-[#263548] active:scale-[0.98];
 }
 
-.page-title {
-  font-weight: 700;
-  letter-spacing: 0;
+/* ─── Navbar ─────────────────────────────────────────────── */
+.navbar-transparent {
+  background: transparent;
 }
 
-.card {
-  border-color: var(--pm-border);
-  border-radius: 8px;
-  box-shadow: 0 10px 24px rgba(23, 32, 51, 0.04);
+.navbar-blur {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.6);
 }
 
-.metric-card {
-  min-height: 132px;
+/* ─── Cards & surfaces ───────────────────────────────────── */
+.glass-card {
+  @apply rounded-2xl border border-[#334155]/80 bg-[#1E293B]/80 backdrop-blur-xl;
 }
 
-.auth-shell {
-  min-height: 100vh;
-  background:
-    linear-gradient(135deg, rgba(36, 87, 197, 0.95), rgba(15, 159, 143, 0.9)),
-    url("./assets/hero.png") center/220px repeat;
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(79, 70, 229, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 70, 229, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
-.auth-panel {
-  width: min(100%, 460px);
-  border-radius: 8px;
+/* ─── Loading skeleton ───────────────────────────────────── */
+.skeleton {
+  @apply animate-pulse rounded-lg bg-[#334155]/60;
 }
 
-.table > :not(caption) > * > * {
-  vertical-align: middle;
+/* ─── Scrollbar ──────────────────────────────────────────── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.form-label {
-  font-weight: 600;
-  color: var(--pm-ink);
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.empty-state {
-  border: 1px dashed var(--pm-border);
-  background: #fff;
-  border-radius: 8px;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
 }
 
-.avatar-circle {
-  width: 42px;
-  height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #e9f0ff;
-  color: var(--pm-primary);
-  font-weight: 700;
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
 }
 
-@media (max-width: 991.98px) {
-  .app-sidebar {
-    width: 100%;
-    min-height: auto;
-    position: static;
-  }
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(6, 182, 212, 0.4); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 5s ease-in-out infinite 0.5s;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
 }

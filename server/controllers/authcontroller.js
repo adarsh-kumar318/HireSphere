@@ -1,12 +1,15 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// ================= REGISTER =================
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Step 1: Check Empty Fields
     if (!name || !email || !password || !role) {
       return res.status(400).json({
         success: false,
@@ -14,7 +17,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Step 2: Check Email Exists
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -24,53 +26,50 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Step 3: Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Step 4: Create User
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
       role,
     });
-    newUser.password = undefined;
-    //generate the token
+
     const token = jwt.sign(
-  { id: newUser._id, role: newUser.role },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
-//final response
-return res.status(201).json({
-  success: true,
-  message: "User registered successfully",
-  user: newUser,
-  token,
-});
+      {
+        id: newUser._id,
+        role: newUser.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
+    newUser.password = undefined;
 
-   
-    // Step 5: Response
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
       user: newUser,
+      token,
     });
 
   } catch (error) {
-    res.status(500).json({
+    console.log(error);
+
+    return res.status(500).json({
       success: false,
       message: "Server Error",
     });
   }
 };
-//-------------login--------//
+
+// ================= LOGIN =================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    //empty check//
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -78,7 +77,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    //check user exists/
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -87,40 +85,106 @@ exports.login = async (req, res) => {
         message: "User not found",
       });
     }
-       // ⭐ STEP 4: Password Compare
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid Credentials",
       });
     }
-     // ⭐ STEP 5: Generate Token
+
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      {
+        id: user._id,
+        role: user.role,
+      },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      {
+        expiresIn: "7d",
+      }
     );
 
     user.password = undefined;
-      // ⭐ FINAL RESPONSE
+
     return res.status(200).json({
       success: true,
-      message: "Login successful",
+      message: "Login Successful",
       user,
       token,
     });
 
   } catch (error) {
+    console.log(error);
+
     return res.status(500).json({
       success: false,
       message: "Server Error",
     });
-
-
-
   }
-
 };
 
+// ================= GOOGLE LOGIN =================
+exports.googleLogin = async (req, res) => {
+  try {
+    const { token, role } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Google token is required",
+      });
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const { email, name, picture } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        password: "",
+        role: role || "freelancer",
+        avatar: picture,
+        isVerified: true,
+      });
+    }
+
+    const jwtToken = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    user.password = undefined;
+
+    return res.status(200).json({
+      success: true,
+      message: "Google Login Successful",
+      user,
+      token: jwtToken,
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Google Login Failed",
+    });
+  }
+};

@@ -1,54 +1,62 @@
-import { FiBriefcase, FiCreditCard, FiShield, FiUsers } from 'react-icons/fi'
-import DataTable from '../../components/Common/DataTable'
-import PageHeader from '../../components/Common/PageHeader'
-import StatCard from '../../components/Common/StatCard'
-import StatusBadge from '../../components/Common/StatusBadge'
-import { disputes, gigs, platformStats } from '../../data/skillSphereData'
+import { Row } from 'react-bootstrap'
+import { FiUsers, FiDollarSign, FiUserCheck, FiTrendingUp } from 'react-icons/fi'
+import StatCard from '../../components/StatCard'
+import { platformStats, users, gigs } from '../../data/mockData'
 
 function AdminDashboard() {
   return (
-    <>
-      <PageHeader title="Admin Dashboard" subtitle="Control users, gigs, payments, fraud signals, and marketplace health." />
-      <div className="row g-3 mb-4">
-        <div className="col-md-3"><StatCard icon={FiCreditCard} label="Platform revenue" value={`Rs ${platformStats.revenue}`} /></div>
-        <div className="col-md-3"><StatCard icon={FiUsers} label="Active freelancers" value={platformStats.activeFreelancers} tone="success" /></div>
-        <div className="col-md-3"><StatCard icon={FiBriefcase} label="Job success rate" value={platformStats.jobSuccessRate} tone="warning" /></div>
-        <div className="col-md-3"><StatCard icon={FiShield} label="Open disputes" value={platformStats.disputesOpen} tone="danger" /></div>
+    <div>
+      <div className="page-header">
+        <h1 className="h3 fw-bold mb-1">Admin Dashboard</h1>
+        <p className="text-muted mb-0">Platform overview and quick actions</p>
       </div>
-      <div className="row g-3">
-        <div className="col-lg-7">
-          <div className="card h-100">
-            <div className="card-header bg-white fw-semibold">Gig Review Queue</div>
-            <div className="card-body p-0">
-              <DataTable
-                rows={gigs}
-                columns={[
-                  { key: 'title', label: 'Gig' },
-                  { key: 'client', label: 'Client' },
-                  { key: 'category', label: 'Category' },
-                  { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
-                ]}
-              />
+
+      <Row className="g-3 mb-4">
+        <StatCard title="Total Users" value={platformStats.totalUsers.toLocaleString('en-IN')} icon={FiUsers} color="primary" />
+        <StatCard title="Revenue" value={platformStats.revenue} icon={FiDollarSign} color="success" />
+        <StatCard title="Active Freelancers" value={platformStats.activeFreelancers.toLocaleString('en-IN')} icon={FiUserCheck} color="teal" />
+        <StatCard title="Job Success Rate" value={platformStats.jobSuccessRate} icon={FiTrendingUp} color="info" />
+      </Row>
+
+      <Row className="g-4">
+        <div className="col-lg-6">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-header bg-white fw-semibold">Recent Users</div>
+            <div className="table-responsive">
+              <table className="table table-sm mb-0">
+                <tbody>
+                  {users.slice(0, 4).map((u) => (
+                    <tr key={u.id}>
+                      <td>{u.name}</td>
+                      <td><span className="badge bg-light text-dark">{u.role}</span></td>
+                      <td><span className={`badge bg-${u.status === 'Active' ? 'success' : 'danger'}`}>{u.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-        <div className="col-lg-5">
-          <div className="card h-100">
-            <div className="card-header bg-white fw-semibold">Dispute Watch</div>
-            <div className="card-body p-0">
-              <DataTable
-                rows={disputes}
-                columns={[
-                  { key: 'project', label: 'Project' },
-                  { key: 'priority', label: 'Priority' },
-                  { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
-                ]}
-              />
+        <div className="col-lg-6">
+          <div className="card border-0 shadow-sm h-100">
+            <div className="card-header bg-white fw-semibold">Active Gigs</div>
+            <div className="table-responsive">
+              <table className="table table-sm mb-0">
+                <tbody>
+                  {gigs.slice(0, 4).map((g) => (
+                    <tr key={g.id}>
+                      <td>{g.title}</td>
+                      <td>{g.budgetLabel}</td>
+                      <td><span className="badge bg-success">{g.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-      </div>
-    </>
+      </Row>
+    </div>
   )
 }
 

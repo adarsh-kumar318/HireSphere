@@ -1,42 +1,111 @@
-import FormInput from '../Common/FormInput'
+import FormInput from "../common/forminput";
 
-function FreelancerProfileForm({ form, onChange, onSubmit }) {
+const FreelancerProfileForm = ({
+  form,
+  onChange,
+  onSubmit,
+}) => {
   return (
-    <form className="card" onSubmit={onSubmit}>
-      <div className="card-body row g-3">
-        <div className="col-md-6">
-          <FormInput label="Professional name" name="name" value={form.name} onChange={onChange} />
-        </div>
-        <div className="col-md-6">
-          <FormInput label="Headline" name="headline" value={form.headline} onChange={onChange} />
-        </div>
-        <div className="col-md-6">
-          <FormInput label="Location" name="location" value={form.location} onChange={onChange} />
-        </div>
-        <div className="col-md-6">
-          <FormInput label="Hourly rate" name="hourlyRate" value={form.hourlyRate} onChange={onChange} />
-        </div>
-        <div className="col-md-6">
-          <FormInput label="Milestone pricing" name="milestonePricing" value={form.milestonePricing} onChange={onChange} />
-        </div>
-        <div className="col-md-6">
-          <FormInput label="Certifications" name="certifications" value={form.certifications} onChange={onChange} />
-        </div>
-        <div className="col-12">
-          <FormInput label="Skills with proficiency" name="skills" value={form.skills} onChange={onChange} />
-        </div>
-        <div className="col-12">
-          <FormInput label="Work experience timeline" name="experience" as="textarea" rows="4" value={form.experience} onChange={onChange} />
-        </div>
-        <div className="col-12">
-          <FormInput label="Portfolio gallery links" name="portfolio" as="textarea" rows="3" value={form.portfolio} onChange={onChange} />
-        </div>
-      </div>
-      <div className="card-footer bg-white text-end">
-        <button className="btn btn-primary" type="submit">Save Profile</button>
-      </div>
-    </form>
-  )
-}
+    <form
+      onSubmit={onSubmit}
+      className="rounded-2xl border border-gray-200 bg-white shadow-sm"
+    >
+      {/* Form Body */}
+      <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
 
-export default FreelancerProfileForm
+        <FormInput
+          label="Professional Name"
+          name="name"
+          value={form.name}
+          onChange={onChange}
+        />
+
+        <FormInput
+          label="Headline"
+          name="headline"
+          value={form.headline}
+          onChange={onChange}
+        />
+
+        <FormInput
+          label="Location"
+          name="location"
+          value={form.location}
+          onChange={onChange}
+        />
+
+        <FormInput
+          label="Hourly Rate"
+          name="hourlyRate"
+          value={form.hourlyRate}
+          onChange={onChange}
+        />
+
+        <FormInput
+          label="Milestone Pricing"
+          name="milestonePricing"
+          value={form.milestonePricing}
+          onChange={onChange}
+        />
+
+        <FormInput
+          label="Certifications"
+          name="certifications"
+          value={form.certifications}
+          onChange={onChange}
+        />
+
+
+        <div className="md:col-span-2">
+          <FormInput
+            label="Skills With Proficiency"
+            name="skills"
+            value={form.skills}
+            onChange={onChange}
+          />
+        </div>
+
+
+        <div className="md:col-span-2">
+          <FormInput
+            label="Work Experience Timeline"
+            name="experience"
+            as="textarea"
+            rows="4"
+            value={form.experience}
+            onChange={onChange}
+          />
+        </div>
+
+
+        <div className="md:col-span-2">
+          <FormInput
+            label="Portfolio Gallery Links"
+            name="portfolio"
+            as="textarea"
+            rows="3"
+            value={form.portfolio}
+            onChange={onChange}
+          />
+        </div>
+
+      </div>
+
+
+      {/* Footer */}
+      <div className="flex justify-end border-t border-gray-200 p-6">
+
+        <button
+          type="submit"
+          className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
+        >
+          Save Profile
+        </button>
+
+      </div>
+
+    </form>
+  );
+};
+
+export default FreelancerProfileForm;

@@ -1,15 +1,19 @@
+import { Container, Button } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import { FiHome } from 'react-icons/fi'
 
 function NotFound() {
   return (
-    <main className="min-vh-100 d-flex align-items-center justify-content-center bg-light p-3">
-      <section className="card text-center p-4 p-md-5">
-        <span className="display-4 fw-bold text-primary">404</span>
-        <h1 className="h3 fw-bold">Page not found</h1>
-        <p className="text-secondary">The page you are looking for does not exist.</p>
-        <Link className="btn btn-primary" to="/login">Back home</Link>
-      </section>
-    </main>
+    <Container className="py-5 text-center">
+      <h1 className="display-1 fw-bold text-primary">404</h1>
+      <h2 className="h4 mb-3">Page not found</h2>
+      <p className="text-muted mb-4">
+        The page you are looking for does not exist or has been moved.
+      </p>
+      <Button as={Link} to="/" variant="primary" className="btn-teal">
+        <FiHome className="me-2" /> Back to Home
+      </Button>
+    </Container>
   )
 }
 

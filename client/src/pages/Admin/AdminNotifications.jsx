@@ -17,7 +17,7 @@ function AdminNotifications() {
               <h2 className="h6 mb-1">{item.title}</h2>
               <small className="text-secondary">Today</small>
             </div>
-            <p className="mb-0 text-secondary">{item.message}</p>
+            <p className="text-secondary mb-0">{item.message}</p>
           </div>
         ))}
       </div>
