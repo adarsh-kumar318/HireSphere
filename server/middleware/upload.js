@@ -3,13 +3,17 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
 
 const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => ({
-    folder: "placement-management",
-    resource_type: "auto",
-  }),
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: "placement-management",
+      resource_type: "auto",
+    };
+  },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage: storage,
+});
 
 module.exports = upload;

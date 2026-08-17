@@ -7,11 +7,14 @@ const roleMiddleware = require("../middleware/roleMiddleware");
 const {
   applyJob,
   getMyApplications,
+  getMyCollaborations,
   getJobApplications,
   updateApplicationStatus,
 } = require("../controllers/applicationController");
 
-// Apply Job
+// ==========================================
+// Freelancer - Apply Job
+// ==========================================
 router.post(
   "/apply",
   authMiddleware,
@@ -19,7 +22,9 @@ router.post(
   applyJob
 );
 
-// My Applications
+// ==========================================
+// Freelancer - My Applications
+// ==========================================
 router.get(
   "/my",
   authMiddleware,
@@ -27,27 +32,19 @@ router.get(
   getMyApplications
 );
 
-// View Applicants (Client)
+// ==========================================
+// Freelancer - My Collaborations
+// ==========================================
 router.get(
-  "/job/:jobId",
-  authMiddleware,
-  roleMiddleware("client"),
-  getJobApplications
-);
-router.post(
-  "/apply",
+  "/collaborations",
   authMiddleware,
   roleMiddleware("freelancer"),
-  applyJob
+  getMyCollaborations
 );
 
-router.get(
-  "/my",
-  authMiddleware,
-  roleMiddleware("freelancer"),
-  getMyApplications
-);
-
+// ==========================================
+// Client - View Job Applications
+// ==========================================
 router.get(
   "/job/:jobId",
   authMiddleware,
@@ -55,14 +52,14 @@ router.get(
   getJobApplications
 );
 
-// ⭐ YAHAN ADD KARO
+// ==========================================
+// Client - Accept / Reject Application
+// ==========================================
 router.put(
   "/:applicationId/status",
   authMiddleware,
   roleMiddleware("client"),
   updateApplicationStatus
 );
-
-module.exports = router;
 
 module.exports = router;

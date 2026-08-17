@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom'
-import { Nav } from 'react-bootstrap'
 import {
   FiHome, FiPlusCircle, FiList, FiInbox, FiSearch, FiSend,
   FiUser, FiImage, FiUsers, FiBarChart2, FiMessageSquare,
@@ -33,30 +32,35 @@ function SidebarNav({ role, onNavigate }) {
   const links = navConfig[role] || []
 
   return (
-    <Nav className="flex-column px-3 py-3">
+    <nav className="flex flex-col px-3 py-3 space-y-1">
       {links.map(({ to, label, icon: Icon }) => (
-        <Nav.Link
+        <NavLink
           key={to}
-          as={NavLink}
           to={to}
           end={to.endsWith('/dashboard')}
-          className="d-flex align-items-center gap-2"
+          className={({ isActive }) =>
+            `flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+              isActive
+                ? 'bg-indigo-600/20 text-indigo-400'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`
+          }
           onClick={onNavigate}
         >
           <Icon size={18} />
           {label}
-        </Nav.Link>
+        </NavLink>
       ))}
-    </Nav>
+    </nav>
   )
 }
 
 function Sidebar({ role, onNavigate }) {
   return (
-    <aside className="dashboard-sidebar d-none d-lg-flex flex-column">
-      <div className="p-3 border-bottom">
-        <h5 className="mb-0 text-primary fw-bold">SkillSphere</h5>
-        <small className="text-muted text-capitalize">{role} Portal</small>
+    <aside className="w-64 bg-[#1E293B] border-r border-[#334155] flex flex-col h-full">
+      <div className="p-4 border-b border-[#334155]">
+        <h5 className="mb-0 text-white font-bold text-lg">SkillSphere</h5>
+        <small className="text-slate-400 capitalize">{role} Portal</small>
       </div>
       <SidebarNav role={role} onNavigate={onNavigate} />
     </aside>

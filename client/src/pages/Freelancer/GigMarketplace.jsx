@@ -13,6 +13,7 @@ function GigMarketplace() {
   const [gigs, setGigs] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -22,10 +23,24 @@ function GigMarketplace() {
   const fetchGigs = async (query = '') => {
     try {
       setLoading(true)
-      const data = await searchGigs({ q: query, status: 'open' })
-      setGigs(Array.isArray(data) ? data : (data.gigs || []))
+
+      const data = await searchGigs({
+        keyword: query,
+        limit: 6,
+      })
+
+      setGigs(
+        Array.isArray(data)
+          ? data
+          : Array.isArray(data?.gigs)
+            ? data.gigs
+            : []
+      )
     } catch (error) {
+      console.error('Marketplace error:', error)
+
       toast.error('Failed to load marketplace gigs')
+
       setGigs([])
     } finally {
       setLoading(false)
@@ -37,39 +52,75 @@ function GigMarketplace() {
     fetchGigs(search)
   }
 
+  const handleClearSearch = () => {
+    setSearch('')
+    fetchGigs('')
+  }
+
   const handleApply = (id) => {
     navigate(`/freelancer/proposals/new/${id}`)
   }
 
   return (
-    <div>
+    <div className="space-y-6">
+
+      {/* Page Header */}
       <PageHeader
         title="Gig Marketplace"
         subtitle="Find the perfect project that matches your skills"
       />
 
-      {/* Filters / Search Bar */}
-      <div className="bg-[#1E293B] border border-[#334155] rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-4 items-center">
-        <form onSubmit={handleSearch} className="flex-1 relative w-full">
-          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Search by keywords, skills, or categories..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#0F172A] border border-[#334155] rounded-xl pl-11 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-          />
+      {/* Search & Filter */}
+      <div className="mb-8 rounded-2xl border border-[#334155] bg-[#1E293B] p-4">
+
+        <form
+          onSubmit={handleSearch}
+          className="flex flex-col gap-4 lg:flex-row lg:items-center"
+        >
+
+          {/* Search Input */}
+          <div className="relative w-full flex-1">
+            <FiSearch
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+            />
+
+            <input
+              type="text"
+              placeholder="Search by keywords, skills, or categories..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-xl border border-[#334155] bg-[#0F172A] py-3 pl-11 pr-4 text-sm text-white transition-colors placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex w-full gap-3 lg:w-auto">
+
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => fetchGigs(search)}
+              className="flex flex-1 items-center justify-center gap-2 lg:flex-none"
+            >
+              <FiFilter size={16} />
+              Filters
+            </Button>
+
+            <Button
+              type="submit"
+              className="flex flex-1 items-center justify-center gap-2 lg:flex-none"
+            >
+              <FiSearch size={16} />
+              Search
+            </Button>
+
+          </div>
+
         </form>
-        <div className="flex gap-3 w-full sm:w-auto">
-          <Button variant="secondary" onClick={() => fetchGigs(search)} className="flex-1 sm:flex-none">
-            <FiFilter /> Filters
-          </Button>
-          <Button onClick={handleSearch} className="flex-1 sm:flex-none">
-            Search
-          </Button>
-        </div>
       </div>
 
+      {/* Results */}
       {loading ? (
         <LoadingSpinner message="Loading gigs..." />
       ) : gigs.length === 0 ? (
@@ -77,22 +128,46 @@ function GigMarketplace() {
           title="No Gigs Found"
           description="Try adjusting your search criteria or check back later for new opportunities."
           actionLabel="Clear Search"
-          action={() => { setSearch(''); fetchGigs(''); }}
+          action={handleClearSearch}
         />
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {gigs.map((gig) => (
-            <GigCard
-              key={gig._id || gig.id}
-              gig={gig}
-              action={
-                <Button className="w-full justify-center" onClick={() => handleApply(gig._id || gig.id)}>
-                  Apply Now
-                </Button>
-              }
-            />
-          ))}
-        </div>
+        <>
+          {/* Results Header */}
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                Available Opportunities
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-400">
+                {gigs.length} {gigs.length === 1 ? 'gig' : 'gigs'} found
+              </p>
+            </div>
+          </div>
+
+          {/* Gig Grid */}
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {gigs.map((gig) => {
+              const gigId = gig._id || gig.id
+
+              return (
+                <GigCard
+                  key={gigId}
+                  gig={gig}
+                  action={
+                    <Button
+                      type="button"
+                      className="w-full justify-center"
+                      onClick={() => handleApply(gigId)}
+                    >
+                      Apply Now
+                    </Button>
+                  }
+                />
+              )
+            })}
+          </div>
+        </>
       )}
     </div>
   )

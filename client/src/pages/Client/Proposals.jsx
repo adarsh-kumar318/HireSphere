@@ -1,47 +1,58 @@
-import { Badge, Button } from 'react-bootstrap'
 import { proposals } from '../../data/mockData'
 
-const statusVariant = {
-  Accepted: 'success',
-  Negotiating: 'warning',
-  Submitted: 'primary',
-  Rejected: 'danger',
+const statusMap = {
+  Accepted: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  Negotiating: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  Submitted: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+  Rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
 }
 
 function Proposals() {
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="h3 fw-bold mb-1">Proposals</h1>
-        <p className="text-muted mb-0">Review proposals from freelancers on your gigs</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Proposals</h1>
+        <p className="text-slate-400 text-sm">Review proposals from freelancers on your gigs</p>
       </div>
 
-      <div className="card border-0 shadow-sm">
-        <div className="table-responsive">
-          <table className="table table-hover mb-0 align-middle">
-            <thead className="table-light">
+      <div className="bg-[#1E293B] border border-[#334155] rounded-2xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-300">
+            <thead className="bg-slate-800 text-slate-200 text-xs font-semibold uppercase tracking-wider border-b border-[#334155]">
               <tr>
-                <th>Gig</th>
-                <th>Freelancer</th>
-                <th>Bid Amount</th>
-                <th>Timeline</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th className="px-6 py-4">Gig</th>
+                <th className="px-6 py-4">Freelancer</th>
+                <th className="px-6 py-4">Bid Amount</th>
+                <th className="px-6 py-4">Timeline</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[#334155]">
               {proposals.map((p) => (
-                <tr key={p.id}>
-                  <td className="fw-medium">{p.gig}</td>
-                  <td>{p.freelancer}</td>
-                  <td>{p.bidAmount}</td>
-                  <td>{p.timeline}</td>
-                  <td>
-                    <Badge bg={statusVariant[p.status] || 'secondary'}>{p.status}</Badge>
+                <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
+                  <td className="px-6 py-4 font-medium text-white">{p.gig}</td>
+                  <td className="px-6 py-4">{p.freelancer}</td>
+                  <td className="px-6 py-4 text-indigo-400 font-semibold">{p.bidAmount}</td>
+                  <td className="px-6 py-4">{p.timeline}</td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                      statusMap[p.status] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                    }`}>
+                      {p.status}
+                    </span>
                   </td>
-                  <td>
-                    <Button size="sm" variant="outline-success" className="me-1">Accept</Button>
-                    <Button size="sm" variant="outline-danger">Decline</Button>
+                  <td className="px-6 py-4 text-right space-x-2">
+                    <button
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25 transition-all"
+                    >
+                      Decline
+                    </button>
                   </td>
                 </tr>
               ))}

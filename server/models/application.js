@@ -14,6 +14,18 @@ const applicationSchema = new mongoose.Schema(
       required: true,
     },
 
+    bidAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    timeline: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],
@@ -23,6 +35,7 @@ const applicationSchema = new mongoose.Schema(
     coverLetter: {
       type: String,
       required: true,
+      trim: true,
     },
   },
   {

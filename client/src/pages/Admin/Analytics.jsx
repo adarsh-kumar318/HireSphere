@@ -1,4 +1,3 @@
-import { Row, Col, Card } from 'react-bootstrap'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -22,8 +21,8 @@ function Analytics() {
     datasets: [{
       label: 'Revenue (₹)',
       data: analyticsData.monthlyRevenue,
-      borderColor: '#0d6efd',
-      backgroundColor: 'rgba(13, 110, 253, 0.1)',
+      borderColor: '#4F46E5', // Indigo-600
+      backgroundColor: 'rgba(79, 70, 229, 0.1)',
       tension: 0.3,
       fill: true,
     }],
@@ -34,7 +33,7 @@ function Analytics() {
     datasets: [{
       label: 'Total Users',
       data: analyticsData.userGrowth,
-      backgroundColor: '#0d9488',
+      backgroundColor: '#06B6D4', // Cyan-500
     }],
   }
 
@@ -42,45 +41,52 @@ function Analytics() {
     labels: analyticsData.gigsByCategory.labels,
     datasets: [{
       data: analyticsData.gigsByCategory.values,
-      backgroundColor: ['#0d6efd', '#0d9488', '#198754', '#ffc107', '#6c757d'],
+      backgroundColor: ['#4F46E5', '#06B6D4', '#22C55E', '#F59E0B', '#64748B'],
+      borderWidth: 1,
+      borderColor: '#1E293B',
     }],
   }
 
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="h3 fw-bold mb-1">Analytics</h1>
-        <p className="text-muted mb-0">Platform performance and growth metrics</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Analytics</h1>
+        <p className="text-slate-400 text-sm">Platform performance and growth metrics</p>
       </div>
 
-      <Row className="g-4">
-        <Col lg={8}>
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white fw-semibold">Monthly Revenue</Card.Header>
-            <Card.Body>
-              <Line data={revenueChart} options={{ responsive: true, plugins: { legend: { display: false } } }} />
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col lg={4}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="bg-white fw-semibold">Gigs by Category</Card.Header>
-            <Card.Body className="d-flex align-items-center justify-content-center">
-              <div style={{ maxWidth: 220 }}>
-                <Doughnut data={categoryChart} />
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={12}>
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white fw-semibold">User Growth</Card.Header>
-            <Card.Body>
-              <Bar data={userChart} options={{ responsive: true, plugins: { legend: { display: false } } }} />
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Monthly Revenue */}
+        <div className="lg:col-span-2 bg-[#1E293B] border border-[#334155] rounded-2xl overflow-hidden shadow-sm flex flex-col">
+          <div className="px-5 py-4 border-b border-[#334155] font-semibold text-white">
+            Monthly Revenue
+          </div>
+          <div className="p-5 flex-1 flex items-center justify-center">
+            <Line data={revenueChart} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+          </div>
+        </div>
+
+        {/* Gigs by Category */}
+        <div className="bg-[#1E293B] border border-[#334155] rounded-2xl overflow-hidden shadow-sm flex flex-col">
+          <div className="px-5 py-4 border-b border-[#334155] font-semibold text-white">
+            Gigs by Category
+          </div>
+          <div className="p-5 flex-1 flex items-center justify-center">
+            <div className="w-full max-w-[220px]">
+              <Doughnut data={categoryChart} options={{ plugins: { legend: { labels: { color: '#F8FAFC' } } } }} />
+            </div>
+          </div>
+        </div>
+
+        {/* User Growth */}
+        <div className="lg:col-span-3 bg-[#1E293B] border border-[#334155] rounded-2xl overflow-hidden shadow-sm flex flex-col">
+          <div className="px-5 py-4 border-b border-[#334155] font-semibold text-white">
+            User Growth
+          </div>
+          <div className="p-5 flex-1 flex items-center justify-center">
+            <Bar data={userChart} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

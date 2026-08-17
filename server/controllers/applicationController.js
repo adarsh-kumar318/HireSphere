@@ -2,19 +2,32 @@ const Application = require("../models/Application");
 const Job = require("../models/Job");
 
 // ==========================================
-// Apply Job
+// Apply Job - Freelancer
 // ==========================================
 exports.applyJob = async (req, res) => {
   try {
-    const { jobId, coverLetter } = req.body;
+    const {
+      jobId,
+      coverLetter,
+      bidAmount,
+      timeline,
+    } = req.body;
 
-    if (!jobId || !coverLetter) {
+    // Validate fields
+    if (
+      !jobId ||
+      !coverLetter ||
+      bidAmount === undefined ||
+      bidAmount === null ||
+      !timeline
+    ) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
       });
     }
 
+    // Find job
     const job = await Job.findById(jobId);
 
     if (!job) {
@@ -24,6 +37,7 @@ exports.applyJob = async (req, res) => {
       });
     }
 
+    // Check duplicate application
     const alreadyApplied = await Application.findOne({
       job: jobId,
       freelancer: req.user.id,
@@ -36,10 +50,13 @@ exports.applyJob = async (req, res) => {
       });
     }
 
+    // Create application
     const application = await Application.create({
       job: jobId,
       freelancer: req.user.id,
       coverLetter,
+      bidAmount: Number(bidAmount),
+      timeline,
     });
 
     return res.status(201).json({
@@ -48,6 +65,8 @@ exports.applyJob = async (req, res) => {
       application,
     });
   } catch (error) {
+    console.error("Apply Job Error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -56,7 +75,7 @@ exports.applyJob = async (req, res) => {
 };
 
 // ==========================================
-// My Applications
+// My Applications - Freelancer
 // ==========================================
 exports.getMyApplications = async (req, res) => {
   try {
@@ -72,6 +91,8 @@ exports.getMyApplications = async (req, res) => {
       applications,
     });
   } catch (error) {
+    console.error("Get My Applications Error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -80,7 +101,35 @@ exports.getMyApplications = async (req, res) => {
 };
 
 // ==========================================
-// Get Applicants of a Job (Client)
+// My Collaborations - Freelancer
+// Accepted Applications
+// ==========================================
+exports.getMyCollaborations = async (req, res) => {
+  try {
+    const collaborations = await Application.find({
+      freelancer: req.user.id,
+      status: "accepted",
+    })
+      .populate("job", "title description budget deadline createdBy")
+      .sort({ updatedAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: collaborations.length,
+      collaborations,
+    });
+  } catch (error) {
+    console.error("Get Collaborations Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ==========================================
+// Get Applicants of a Job - Client
 // ==========================================
 exports.getJobApplications = async (req, res) => {
   try {
@@ -95,6 +144,7 @@ exports.getJobApplications = async (req, res) => {
       });
     }
 
+    // Only job owner can see applicants
     if (job.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
@@ -114,6 +164,8 @@ exports.getJobApplications = async (req, res) => {
       applications,
     });
   } catch (error) {
+    console.error("Get Job Applications Error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -122,13 +174,14 @@ exports.getJobApplications = async (req, res) => {
 };
 
 // ==========================================
-// Accept / Reject Application
+// Accept / Reject Application - Client
 // ==========================================
 exports.updateApplicationStatus = async (req, res) => {
   try {
     const { applicationId } = req.params;
     const { status } = req.body;
 
+    // Validate status
     if (!["accepted", "rejected"].includes(status)) {
       return res.status(400).json({
         success: false,
@@ -136,7 +189,10 @@ exports.updateApplicationStatus = async (req, res) => {
       });
     }
 
-    const application = await Application.findById(applicationId).populate("job");
+    // Find application
+    const application = await Application.findById(
+      applicationId
+    ).populate("job");
 
     if (!application) {
       return res.status(404).json({
@@ -145,14 +201,19 @@ exports.updateApplicationStatus = async (req, res) => {
       });
     }
 
-    if (application.job.createdBy.toString() !== req.user.id) {
+    // Check job owner
+    if (
+      application.job.createdBy.toString() !== req.user.id
+    ) {
       return res.status(403).json({
         success: false,
         message: "Access Denied",
       });
     }
 
+    // Update status
     application.status = status;
+
     await application.save();
 
     return res.status(200).json({
@@ -161,6 +222,8 @@ exports.updateApplicationStatus = async (req, res) => {
       application,
     });
   } catch (error) {
+    console.error("Update Application Status Error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,

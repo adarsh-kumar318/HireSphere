@@ -1,29 +1,38 @@
-import { Card, Col } from 'react-bootstrap'
+function StatCard({ title, label, value, icon: Icon, color, tone, subtitle, helper, className = '' }) {
+  const displayTitle = title || label || ''
+  const displaySubtitle = subtitle || helper || ''
+  const activeColor = color || tone || 'primary'
 
-function StatCard({ title, value, icon: Icon, color = 'primary', subtitle }) {
-  const bgClass = {
-    primary: 'bg-primary bg-opacity-10 text-primary',
-    success: 'bg-success bg-opacity-10 text-success',
-    warning: 'bg-warning bg-opacity-10 text-warning',
-    info: 'bg-info bg-opacity-10 text-info',
-    teal: 'bg-teal bg-opacity-10 text-teal',
-  }[color] || 'bg-primary bg-opacity-10 text-primary'
+  const colorMap = {
+    primary: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    success: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    warning: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    danger: 'bg-red-500/10 text-red-400 border-red-500/20',
+    info: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    teal: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+  }
+
+  const bgClass = colorMap[activeColor] || colorMap.primary
 
   return (
-    <Col xs={12} sm={6} lg={3}>
-      <Card className="card-stat h-100">
-        <Card.Body className="d-flex align-items-center gap-3">
-          <div className={`stat-icon ${bgClass}`}>
-            {Icon && <Icon size={22} />}
+    <div className={`bg-[#1E293B] border border-[#334155] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:border-indigo-500/20 transition-all duration-300 ${className}`}>
+      <div className={`p-3 rounded-xl ${bgClass} flex-shrink-0`}>
+        {Icon && <Icon size={22} />}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-slate-400 text-xs font-medium uppercase tracking-wider truncate">
+          {displayTitle}
+        </div>
+        <div className="text-white text-2xl font-bold mt-1 tracking-tight truncate">
+          {value}
+        </div>
+        {displaySubtitle && (
+          <div className="text-slate-500 text-xs mt-1 truncate">
+            {displaySubtitle}
           </div>
-          <div>
-            <div className="text-muted small">{title}</div>
-            <div className="fs-4 fw-bold">{value}</div>
-            {subtitle && <div className="small text-muted">{subtitle}</div>}
-          </div>
-        </Card.Body>
-      </Card>
-    </Col>
+        )}
+      </div>
+    </div>
   )
 }
 

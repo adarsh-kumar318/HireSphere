@@ -36,6 +36,7 @@ const mapUserToFreelancer = (user) => ({
 exports.getMarketplaceGigs = async (req, res) => {
   try {
     const { limit = 6, keyword, location, sort } = req.query;
+
     const query = {};
 
     if (keyword) {
@@ -46,21 +47,55 @@ exports.getMarketplaceGigs = async (req, res) => {
       query.location = location;
     }
 
-    const sortOption = sort === "popular" ? { createdAt: -1 } : { createdAt: -1 };
+    const sortOption =
+      sort === "popular"
+        ? { createdAt: -1 }
+        : { createdAt: -1 };
 
     const jobs = await Job.find(query)
       .sort(sortOption)
       .limit(Number(limit));
 
+    const gigs = await Promise.all(
+      jobs.map(async (job) => {
+        const proposalCount = await Application.countDocuments({
+          job: job._id,
+        });
+
+        return {
+          _id: job._id,
+          id: job._id,
+          title: job.title,
+          client: job.company || "Client",
+          freelancer: job.company,
+          location: job.location,
+          budget: job.salary,
+          startingPrice: job.salary,
+          description: job.description,
+          category: "Services",
+          status: "Open",
+          deliveryTime: "Flexible",
+          rating: null,
+          reviewCount: 0,
+          proposals: proposalCount,
+          seller: {
+            name: job.company || "Client",
+          },
+        };
+      })
+    );
+
     return res.status(200).json({
       success: true,
-      gigs: jobs.map(mapJobToGig),
+      gigs,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
-
 exports.getMarketplaceFreelancers = async (req, res) => {
   try {
     const { limit = 6 } = req.query;

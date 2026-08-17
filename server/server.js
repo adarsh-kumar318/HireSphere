@@ -10,12 +10,12 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const errorMiddleware = require("./middleware/errorMiddleware");
 const adminRoutes = require("./routes/adminRoutes");
 const marketplaceRoutes = require("./routes/marketplaceRoutes");
-
-
-
+const companyRoutes = require("./routes/companyRoutes");
+const availabilityRoutes = require("./routes/availabilityRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 const connectDB = require("./config/db");
-
+const notificationRoutes = require("./routes/notificationRoutes");
 
 
 
@@ -35,10 +35,10 @@ app.use("/api/upload", uploadRoutes);
 app.use(errorMiddleware);
 app.use("/api/admin", adminRoutes);
 app.use("/api/marketplace", marketplaceRoutes);
-
-
-
-
+app.use("/api/company", companyRoutes);
+app.use("/api/availability", availabilityRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 
 

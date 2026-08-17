@@ -1,48 +1,63 @@
-import { Badge } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { clientGigs } from '../../data/mockData'
 
 function MyGigs() {
   return (
-    <div>
-      <div className="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-          <h1 className="h3 fw-bold mb-1">My Gigs</h1>
-          <p className="text-muted mb-0">Manage all gigs you have posted</p>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold text-white tracking-tight">My Gigs</h1>
+          <p className="text-slate-400 text-sm">Manage all gigs you have posted</p>
         </div>
-        <Link to="/client/post-gig" className="btn btn-primary btn-teal">Post New Gig</Link>
+        <Link to="/client/post-gig" className="btn-primary">
+          Post New Gig
+        </Link>
       </div>
 
-      <div className="card border-0 shadow-sm">
-        <div className="table-responsive">
-          <table className="table table-hover mb-0 align-middle">
-            <thead className="table-light">
+      <div className="bg-[#1E293B] border border-[#334155] rounded-2xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-300">
+            <thead className="bg-slate-800 text-slate-200 text-xs font-semibold uppercase tracking-wider border-b border-[#334155]">
               <tr>
-                <th>#</th>
-                <th>Title</th>
-                <th>Budget</th>
-                <th>Proposals</th>
-                <th>Posted</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th className="px-6 py-4">#</th>
+                <th className="px-6 py-4">Title</th>
+                <th className="px-6 py-4">Budget</th>
+                <th className="px-6 py-4">Proposals</th>
+                <th className="px-6 py-4">Posted</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[#334155]">
               {clientGigs.map((gig, i) => (
-                <tr key={gig.id}>
-                  <td>{i + 1}</td>
-                  <td className="fw-medium">{gig.title}</td>
-                  <td>{gig.budget}</td>
-                  <td>{gig.proposals}</td>
-                  <td>{gig.posted}</td>
-                  <td>
-                    <Badge bg={gig.status === 'Open' ? 'success' : 'warning'} text={gig.status !== 'Open' ? 'dark' : undefined}>
+                <tr key={gig.id} className="hover:bg-slate-800/40 transition-colors">
+                  <td className="px-6 py-4 text-slate-500 font-medium">{i + 1}</td>
+                  <td className="px-6 py-4 font-medium text-white">{gig.title}</td>
+                  <td className="px-6 py-4 text-indigo-400 font-semibold">{gig.budget}</td>
+                  <td className="px-6 py-4">{gig.proposals}</td>
+                  <td className="px-6 py-4">{gig.posted}</td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                      gig.status === 'Open'
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                    }`}>
                       {gig.status}
-                    </Badge>
+                    </span>
                   </td>
-                  <td>
-                    <Link to={`/gigs/${gig.id}`} className="btn btn-sm btn-outline-primary me-1">View</Link>
-                    <button type="button" className="btn btn-sm btn-outline-secondary">Edit</button>
+                  <td className="px-6 py-4 text-right space-x-2">
+                    <Link
+                      to={`/gigs/${gig.id}`}
+                      className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/25 transition-all"
+                    >
+                      View
+                    </Link>
+                    <button
+                      type="button"
+                      className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-500/15 text-slate-300 border border-slate-500/30 hover:bg-slate-500/25 transition-all"
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}

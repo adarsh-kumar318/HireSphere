@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { Row, Col, Form, Button, Card, Modal } from 'react-bootstrap'
 import GigCard from '../../components/GigCard'
 import { gigs, categories, locations } from '../../data/mockData'
 
@@ -31,107 +30,174 @@ function BrowseGigs() {
   }
 
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="h3 fw-bold mb-1">Browse Gigs</h1>
-        <p className="text-muted mb-0">Find hyperlocal projects matching your skills</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Browse Gigs</h1>
+        <p className="text-slate-400 text-sm">Find hyperlocal projects matching your skills</p>
       </div>
 
-      <Row>
-        <Col lg={3} className="mb-4">
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white fw-semibold">Filters</Card.Header>
-            <Card.Body>
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">Skill</Form.Label>
-                  <Form.Control
-                    placeholder="e.g. React"
-                    value={filters.skill}
-                    onChange={(e) => setFilters({ ...filters, skill: e.target.value })}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">Max Budget (₹)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    placeholder="100000"
-                    value={filters.budget}
-                    onChange={(e) => setFilters({ ...filters, budget: e.target.value })}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">Location</Form.Label>
-                  <Form.Select value={filters.location} onChange={(e) => setFilters({ ...filters, location: e.target.value })}>
-                    <option value="">All</option>
-                    {locations.map((l) => <option key={l} value={l}>{l}</option>)}
-                  </Form.Select>
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">Min Rating</Form.Label>
-                  <Form.Select value={filters.rating} onChange={(e) => setFilters({ ...filters, rating: e.target.value })}>
-                    <option value="">Any</option>
-                    <option value="4.5">4.5+</option>
-                    <option value="4.0">4.0+</option>
-                    <option value="3.5">3.5+</option>
-                  </Form.Select>
-                </Form.Group>
-                <Button variant="outline-secondary" size="sm" className="w-100" onClick={() => setFilters({ skill: '', budget: '', location: '', rating: '' })}>
-                  Clear Filters
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Filters Sidebar */}
+        <div className="bg-[#1E293B] border border-[#334155] rounded-2xl p-5 shadow-sm h-fit space-y-4">
+          <div className="font-semibold text-white text-base border-b border-[#334155] pb-3">
+            Filters
+          </div>
+          <form className="space-y-4">
+            <div>
+              <label className="block text-slate-300 text-xs font-semibold mb-1.5 uppercase tracking-wider">Skill</label>
+              <input
+                type="text"
+                placeholder="e.g. React"
+                value={filters.skill}
+                onChange={(e) => setFilters({ ...filters, skill: e.target.value })}
+                className="bg-slate-800 border border-[#334155] rounded-xl text-white px-3 py-2 text-sm focus:border-indigo-500 outline-none w-full placeholder-slate-500"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-300 text-xs font-semibold mb-1.5 uppercase tracking-wider">Max Budget (₹)</label>
+              <input
+                type="number"
+                placeholder="100000"
+                value={filters.budget}
+                onChange={(e) => setFilters({ ...filters, budget: e.target.value })}
+                className="bg-slate-800 border border-[#334155] rounded-xl text-white px-3 py-2 text-sm focus:border-indigo-500 outline-none w-full placeholder-slate-500"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-300 text-xs font-semibold mb-1.5 uppercase tracking-wider">Location</label>
+              <select
+                value={filters.location}
+                onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+                className="bg-slate-800 border border-[#334155] rounded-xl text-white px-3 py-2 text-sm focus:border-indigo-500 outline-none w-full"
+              >
+                <option value="">All</option>
+                {locations.map((l) => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-slate-300 text-xs font-semibold mb-1.5 uppercase tracking-wider">Min Rating</label>
+              <select
+                value={filters.rating}
+                onChange={(e) => setFilters({ ...filters, rating: e.target.value })}
+                className="bg-slate-800 border border-[#334155] rounded-xl text-white px-3 py-2 text-sm focus:border-indigo-500 outline-none w-full"
+              >
+                <option value="">Any</option>
+                <option value="4.5">4.5+</option>
+                <option value="4.0">4.0+</option>
+                <option value="3.5">3.5+</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFilters({ skill: '', budget: '', location: '', rating: '' })}
+              className="w-full inline-flex justify-center px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-[#334155] transition-all"
+            >
+              Clear Filters
+            </button>
+          </form>
+        </div>
 
-        <Col lg={9}>
-          <Row className="g-4">
+        {/* Gigs List */}
+        <div className="lg:col-span-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredGigs.map((gig) => (
-              <Col key={gig.id} xs={12} md={6} xl={4}>
-                <div className="position-relative">
-                  <GigCard gig={gig} />
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    className="btn-teal position-absolute bottom-0 end-0 m-3"
-                    style={{ zIndex: 2 }}
+              <div key={gig.id} className="relative group">
+                <GigCard gig={gig} />
+                <div className="absolute bottom-4 right-4 z-20">
+                  <button
                     onClick={() => openProposal(gig)}
+                    className="px-3 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg hover:shadow-indigo-600/30 transition-all duration-200"
                   >
                     Submit Proposal
-                  </Button>
+                  </button>
                 </div>
-              </Col>
+              </div>
             ))}
-          </Row>
-        </Col>
-      </Row>
+          </div>
+        </div>
+      </div>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Submit Proposal</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={submitProposal}>
-          <Modal.Body>
-            {selectedGig && <p className="text-muted small mb-3">For: <strong>{selectedGig.title}</strong></p>}
-            <Form.Group className="mb-3">
-              <Form.Label>Your Bid (₹)</Form.Label>
-              <Form.Control type="number" required value={proposal.amount} onChange={(e) => setProposal({ ...proposal, amount: e.target.value })} />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Timeline</Form.Label>
-              <Form.Control placeholder="e.g. 14 days" required value={proposal.timeline} onChange={(e) => setProposal({ ...proposal, timeline: e.target.value })} />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Cover Letter</Form.Label>
-              <Form.Control as="textarea" rows={4} required value={proposal.coverLetter} onChange={(e) => setProposal({ ...proposal, coverLetter: e.target.value })} />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button type="submit" variant="primary" className="btn-teal">Send Proposal</Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+      {/* Modal overlay */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+
+          {/* Modal Container */}
+          <div className="relative w-full max-w-lg bg-[#1E293B] border border-[#334155] rounded-2xl shadow-2xl overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-[#334155]">
+              <h2 className="text-lg font-bold text-white">Submit Proposal</h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-slate-400 hover:text-white text-2xl leading-none"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={submitProposal} className="p-6 space-y-4">
+              {selectedGig && (
+                <div className="text-slate-400 text-sm">
+                  For: <strong className="text-white">{selectedGig.title}</strong>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-slate-300 text-sm font-semibold mb-2">Your Bid (₹)</label>
+                <input
+                  type="number"
+                  required
+                  value={proposal.amount}
+                  onChange={(e) => setProposal({ ...proposal, amount: e.target.value })}
+                  className="bg-slate-800 border border-[#334155] rounded-xl text-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none w-full placeholder-slate-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 text-sm font-semibold mb-2">Timeline</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. 14 days"
+                  value={proposal.timeline}
+                  onChange={(e) => setProposal({ ...proposal, timeline: e.target.value })}
+                  className="bg-slate-800 border border-[#334155] rounded-xl text-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none w-full placeholder-slate-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 text-sm font-semibold mb-2">Cover Letter</label>
+                <textarea
+                  rows={4}
+                  required
+                  placeholder="Tell the client why you're a good fit..."
+                  value={proposal.coverLetter}
+                  onChange={(e) => setProposal({ ...proposal, coverLetter: e.target.value })}
+                  className="bg-slate-800 border border-[#334155] rounded-xl text-white px-4 py-2.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none w-full placeholder-slate-500 resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-[#334155]">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-[#334155] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                >
+                  Send Proposal
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
