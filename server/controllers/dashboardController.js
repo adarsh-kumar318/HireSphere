@@ -6,24 +6,37 @@ const Application = require("../models/Application");
 // =====================================
 exports.freelancerDashboard = async (req, res) => {
   try {
-    const totalApplications = await Application.countDocuments({
+    const applications = await Application.find({
       freelancer: req.user.id,
-    });
+    })
+      .populate("job", "title company location salary")
+      .sort({ createdAt: -1 });
 
-    const pending = await Application.countDocuments({
-      freelancer: req.user.id,
-      status: "pending",
-    });
+    const totalApplications = applications.length;
 
-    const accepted = await Application.countDocuments({
-      freelancer: req.user.id,
-      status: "accepted",
-    });
+    const pending = applications.filter(
+      (application) => application.status === "pending"
+    ).length;
 
-    const rejected = await Application.countDocuments({
-      freelancer: req.user.id,
-      status: "rejected",
-    });
+    const accepted = applications.filter(
+      (application) => application.status === "accepted"
+    ).length;
+
+    const rejected = applications.filter(
+      (application) => application.status === "rejected"
+    ).length;
+
+    const recentProjects = applications
+      .filter((application) => application.status === "accepted")
+      .slice(0, 5)
+      .map((application) => ({
+        id: application._id,
+        title: application.job?.title || "Untitled Project",
+        client: application.job?.company || "Unknown Client",
+        budget: application.bidAmount,
+        status: application.status,
+        createdAt: application.createdAt,
+      }));
 
     return res.status(200).json({
       success: true,
@@ -32,9 +45,9 @@ exports.freelancerDashboard = async (req, res) => {
         pending,
         accepted,
         rejected,
+        recentProjects,
       },
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
