@@ -1,8 +1,6 @@
 import {
   WelcomeBanner,
   StatCard,
-  AnalyticsChart,
-  RecentProjects,
   RecentNotifications,
   RecentReviews,
   QuickActions,
@@ -67,50 +65,48 @@ const FreelancerDashboard = () => {
       <WelcomeBanner />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          icon={BriefcaseBusiness}
-          label="Active Projects"
+          title="Active Projects"
           value={dashboard?.accepted ?? 0}
+          icon={BriefcaseBusiness}
+          color="bg-blue-600"
+          change=""
         />
 
         <StatCard
+          title="Total Earnings"
+          value="$0"
           icon={Wallet}
-          label="Total Proposals"
-          value={dashboard?.totalApplications ?? 0}
+          color="bg-green-600"
+          change=""
         />
 
         <StatCard
+          title="Reputation"
+          value="0"
           icon={Star}
-          label="Pending Proposals"
-          value={dashboard?.pending ?? 0}
+          color="bg-yellow-500"
+          change=""
         />
 
         <StatCard
+          title="Portfolio Items"
+          value="0"
           icon={FolderKanban}
-          label="Rejected Proposals"
-          value={dashboard?.rejected ?? 0}
+          color="bg-purple-600"
+          change=""
         />
       </div>
 
-      {/* Analytics + Quick Actions */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <AnalyticsChart />
-        </div>
-
-        <QuickActions />
+      {/* Notifications + Reviews */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <RecentNotifications />
+        <RecentReviews />
       </div>
 
-      {/* Projects + Notifications + Reviews */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <RecentProjects />
-
-        <div className="space-y-6">
-          <RecentNotifications />
-          <RecentReviews />
-        </div>
-      </div>
+      {/* Quick Actions */}
+      <QuickActions />
     </div>
   );
 };

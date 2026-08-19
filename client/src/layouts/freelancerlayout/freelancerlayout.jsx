@@ -8,9 +8,8 @@ import FreelancerBreadcrumb from "./FreelancerBreadcrumb";
 
 const FreelancerLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-950">
       {/* Desktop Sidebar */}
       <FreelancerSidebar />
 
@@ -23,9 +22,7 @@ const FreelancerLayout = () => {
       {/* Main Content */}
       <div className="flex min-h-screen flex-col lg:ml-72">
         {/* Top Navigation */}
-        <FreelancerTopbar
-          setSidebarOpen={setSidebarOpen}
-        />
+        <FreelancerTopbar setSidebarOpen={setSidebarOpen} />
 
         {/* Page Content */}
         <main className="flex-1 p-4 md:p-6">

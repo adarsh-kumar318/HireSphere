@@ -16,7 +16,7 @@ const SidebarItem = ({
         `group flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 ${
           isActive
             ? "bg-blue-600 text-white shadow-md"
-            : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+            : "text-slate-300 hover:bg-slate-800 hover:text-blue-400"
         }`
       }
     >
@@ -28,7 +28,7 @@ const SidebarItem = ({
               className={`transition ${
                 isActive
                   ? "text-white"
-                  : "text-gray-500 group-hover:text-blue-600"
+                  : "text-slate-400 group-hover:text-blue-400"
               }`}
             />
 
@@ -41,7 +41,7 @@ const SidebarItem = ({
                 className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                   isActive
                     ? "bg-white text-blue-600"
-                    : "bg-blue-100 text-blue-600"
+                    : "bg-blue-500/10 text-blue-400"
                 }`}
               >
                 {badge}
@@ -53,7 +53,7 @@ const SidebarItem = ({
               className={`transition-transform ${
                 isActive
                   ? "translate-x-1 text-white"
-                  : "text-gray-400 group-hover:translate-x-1"
+                  : "text-slate-500 group-hover:translate-x-1 group-hover:text-blue-400"
               }`}
             />
           </div>

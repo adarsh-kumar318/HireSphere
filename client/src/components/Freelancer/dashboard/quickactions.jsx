@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 import {
   PlusCircle,
   FolderKanban,
@@ -11,35 +13,37 @@ const actions = [
     title: "Create New Gig",
     description: "Publish a new freelance service.",
     icon: PlusCircle,
-    color: "bg-blue-100 text-blue-600",
+    color: "bg-blue-500/15 text-blue-400",
   },
   {
     id: 2,
     title: "Update Portfolio",
     description: "Add your latest completed work.",
     icon: FolderKanban,
-    color: "bg-purple-100 text-purple-600",
+    color: "bg-purple-500/15 text-purple-400",
   },
   {
     id: 3,
     title: "View Proposals",
     description: "Track all submitted proposals.",
     icon: FileText,
-    color: "bg-green-100 text-green-600",
+    color: "bg-green-500/15 text-green-400",
   },
   {
     id: 4,
     title: "Edit Profile",
     description: "Keep your freelancer profile updated.",
     icon: UserCog,
-    color: "bg-orange-100 text-orange-600",
+    color: "bg-orange-500/15 text-orange-400",
   },
 ];
 
 const QuickActions = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-6 text-xl font-bold text-gray-800">
+    <div className="rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-lg">
+      <h2 className="mb-6 text-xl font-bold text-white">
         Quick Actions
       </h2>
 
@@ -50,7 +54,20 @@ const QuickActions = () => {
           return (
             <button
               key={action.id}
-              className="rounded-2xl border border-gray-100 p-5 text-left transition-all hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
+              onClick={() => {
+                if (action.title === "View Proposals") {
+                  navigate("/freelancer/proposals");
+                }
+
+                if (action.title === "Update Portfolio") {
+                  navigate("/freelancer/portfolio");
+                }
+
+                if (action.title === "Edit Profile") {
+                  navigate("/freelancer/profile");
+                }
+              }}
+              className="rounded-2xl border border-slate-700 bg-slate-800/60 p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:border-slate-600 hover:bg-slate-800 hover:shadow-lg"
             >
               <div
                 className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${action.color}`}
@@ -58,11 +75,11 @@ const QuickActions = () => {
                 <Icon size={28} />
               </div>
 
-              <h3 className="font-semibold text-gray-800">
+              <h3 className="font-semibold text-white">
                 {action.title}
               </h3>
 
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm leading-5 text-slate-400">
                 {action.description}
               </p>
             </button>
