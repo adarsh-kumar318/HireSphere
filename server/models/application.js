@@ -27,15 +27,70 @@ const applicationSchema = new mongoose.Schema(
     },
 
     status: {
-      type: String,
-      enum: ["pending", "accepted", "rejected"],
-      default: "pending",
-    },
+  type: String,
+  enum: [
+    "pending",
+    "accepted",
+    "rejected",
+    "pending_review",
+    "completed",
+    "changes_requested",
+  ],
+  default: "pending",
+},
 
     coverLetter: {
       type: String,
       required: true,
       trim: true,
+    },
+
+    // ==========================================
+    // Project Submission
+    // ==========================================
+
+    submission: {
+      message: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      liveDemoUrl: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      files: [
+        {
+          name: {
+            type: String,
+            trim: true,
+          },
+
+          url: {
+            type: String,
+            trim: true,
+          },
+        },
+      ],
+
+      submittedAt: {
+        type: Date,
+        default: null,
+      },
+
+      reviewedAt: {
+        type: Date,
+        default: null,
+      },
+
+      reviewMessage: {
+        type: String,
+        trim: true,
+        default: "",
+      },
     },
   },
   {
@@ -43,4 +98,7 @@ const applicationSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Application", applicationSchema);
+module.exports = mongoose.model(
+  "Application",
+  applicationSchema
+);

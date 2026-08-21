@@ -6,13 +6,18 @@ import {
   FiAlertCircle,
   FiRefreshCw,
   FiArrowRight,
+  FiUpload,
+  FiX,
 } from "react-icons/fi";
 
 import PageHeader from "../../components/Common/PageHeader";
-import { getMyCollaborations } from "../../services/collaborationService";
+import {
+  getMyCollaborations,
+  submitProject,
+} from "../../services/collaborationService";
 
 // ==========================================
-// Empty State Component
+// Empty State
 // ==========================================
 const EmptyState = ({
   icon: Icon,
@@ -22,10 +27,7 @@ const EmptyState = ({
   return (
     <div className="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-[#26364c] bg-[#102238] px-4 text-center">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1c2a40]">
-        <Icon
-          size={18}
-          className="text-slate-500"
-        />
+        <Icon size={18} className="text-slate-500" />
       </div>
 
       <p className="mt-3 text-xs font-medium text-slate-300">
@@ -39,15 +41,244 @@ const EmptyState = ({
   );
 };
 
-function FreelancerCollaboration() {
-  const [collaborations, setCollaborations] = useState({
-    active: [],
-    pending: [],
-    completed: [],
-  });
-
-  const [loading, setLoading] = useState(true);
+// ==========================================
+// Submission Modal
+// ==========================================
+const SubmissionForm = ({
+  application,
+  onClose,
+  onSubmitted,
+}) => {
+  const [message, setMessage] = useState("");
+  const [liveDemoUrl, setLiveDemoUrl] = useState("");
+  const [files, setFiles] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!message.trim()) {
+      setError("Submission message is required.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError("");
+
+      const formData = new FormData();
+
+      formData.append(
+        "message",
+        message.trim()
+      );
+
+      if (liveDemoUrl.trim()) {
+        formData.append(
+          "liveDemoUrl",
+          liveDemoUrl.trim()
+        );
+      }
+
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      await submitProject(
+        application._id,
+        formData
+      );
+
+      onSubmitted();
+    } catch (err) {
+      console.error(
+        "SUBMIT PROJECT ERROR:",
+        err
+      );
+
+      setError(
+        err.response?.data?.message ||
+          "Unable to submit project."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+      <div className="w-full max-w-lg rounded-xl border border-[#26364c] bg-[#102238] p-5 shadow-2xl">
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold text-white">
+              Submit Project
+            </h2>
+
+            <p className="mt-1 text-[10px] text-slate-400">
+              Submit your completed work to the client.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="rounded-md p-1.5 text-slate-400 transition hover:bg-[#1c2a40] hover:text-white"
+          >
+            <FiX size={18} />
+          </button>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-[10px] text-red-400">
+            <FiAlertCircle size={14} />
+            {error}
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          className="mt-5 space-y-4"
+        >
+
+          {/* Message */}
+          <div>
+            <label className="mb-1.5 block text-[10px] font-medium text-slate-300">
+              Submission Message
+            </label>
+
+            <textarea
+              value={message}
+              onChange={(e) =>
+                setMessage(e.target.value)
+              }
+              rows={5}
+              placeholder="Describe the work you have completed..."
+              className="w-full resize-none rounded-lg border border-[#334258] bg-[#07182a] px-3 py-2.5 text-xs text-white outline-none placeholder:text-slate-600 focus:border-violet-500"
+            />
+          </div>
+
+          {/* Live Demo */}
+          <div>
+            <label className="mb-1.5 block text-[10px] font-medium text-slate-300">
+              Live Demo URL
+            </label>
+
+            <input
+              type="url"
+              value={liveDemoUrl}
+              onChange={(e) =>
+                setLiveDemoUrl(e.target.value)
+              }
+              placeholder="https://your-project.vercel.app"
+              className="w-full rounded-lg border border-[#334258] bg-[#07182a] px-3 py-2.5 text-xs text-white outline-none placeholder:text-slate-600 focus:border-violet-500"
+            />
+          </div>
+
+          {/* Files */}
+          <div>
+            <label className="mb-1.5 block text-[10px] font-medium text-slate-300">
+              Project Files
+            </label>
+
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-[#334258] bg-[#07182a] px-4 py-6 text-xs text-slate-400 transition hover:border-violet-500 hover:text-violet-300">
+              <FiUpload size={16} />
+
+              <span>
+                Select project files
+              </span>
+
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) =>
+                  setFiles(
+                    Array.from(
+                      e.target.files || []
+                    )
+                  )
+                }
+              />
+            </label>
+
+            {files.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {files.map((file, index) => (
+                  <div
+                    key={`${file.name}-${index}`}
+                    className="rounded-md bg-[#07182a] px-3 py-2 text-[10px] text-slate-400"
+                  >
+                    {file.name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2 border-t border-[#26364c] pt-4">
+
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="rounded-lg border border-[#334258] bg-[#1c2a40] px-4 py-2 text-[10px] font-medium text-slate-300 transition hover:text-white"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 rounded-lg bg-violet-500 px-4 py-2 text-[10px] font-medium text-white transition hover:bg-violet-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting ? (
+                <>
+                  <FiRefreshCw
+                    size={13}
+                    className="animate-spin"
+                  />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <FiCheckCircle size={13} />
+                  Submit Project
+                </>
+              )}
+            </button>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// Main Component
+// ==========================================
+function FreelancerCollaboration() {
+  const [collaborations, setCollaborations] =
+    useState({
+      active: [],
+      pending: [],
+      completed: [],
+    });
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const [selectedProject, setSelectedProject] =
+    useState(null);
 
   // ==========================================
   // Fetch Collaborations
@@ -57,9 +288,13 @@ function FreelancerCollaboration() {
       setLoading(true);
       setError("");
 
-      const response = await getMyCollaborations();
+      const response =
+        await getMyCollaborations();
 
-      console.log("COLLABORATIONS RESPONSE:", response);
+      console.log(
+        "COLLABORATIONS RESPONSE:",
+        response
+      );
 
       if (response?.success) {
         setCollaborations(
@@ -104,16 +339,12 @@ function FreelancerCollaboration() {
   // Initial Load
   // ==========================================
   useEffect(() => {
-    const loadCollaborations = async () => {
-      await fetchCollaborations();
-    };
-    loadCollaborations();
+    fetchCollaborations();
   }, []);
 
   // ==========================================
   // Helpers
   // ==========================================
-
   const getJobTitle = (application) => {
     return (
       application?.job?.title ||
@@ -130,7 +361,10 @@ function FreelancerCollaboration() {
   };
 
   const getClientAvatar = (application) => {
-    return application?.job?.createdBy?.avatar || "";
+    return (
+      application?.job?.createdBy?.avatar ||
+      ""
+    );
   };
 
   const getBidAmount = (application) => {
@@ -138,7 +372,9 @@ function FreelancerCollaboration() {
       application?.bidAmount || 0
     );
 
-    return `₹${amount.toLocaleString("en-IN")}`;
+    return `₹${amount.toLocaleString(
+      "en-IN"
+    )}`;
   };
 
   const getTimeline = (application) => {
@@ -165,10 +401,10 @@ function FreelancerCollaboration() {
   // ==========================================
   // Loading
   // ==========================================
-
   if (loading) {
     return (
       <div className="min-h-full bg-[#07182a] px-3 py-4 text-white sm:px-5">
+
         <PageHeader
           title="Collaboration"
           subtitle="Work with clients through chat, files, video, and progress logs."
@@ -176,11 +412,13 @@ function FreelancerCollaboration() {
 
         <div className="flex min-h-[400px] items-center justify-center">
           <div className="flex flex-col items-center">
+
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-violet-300" />
 
             <p className="mt-3 text-xs text-slate-400">
               Loading collaborations...
             </p>
+
           </div>
         </div>
       </div>
@@ -190,16 +428,17 @@ function FreelancerCollaboration() {
   // ==========================================
   // Error
   // ==========================================
-
   if (error) {
     return (
       <div className="min-h-full bg-[#07182a] px-3 py-4 text-white sm:px-5">
+
         <PageHeader
           title="Collaboration"
           subtitle="Work with clients through chat, files, video, and progress logs."
         />
 
         <div className="mt-5 rounded-xl border border-red-500/20 bg-[#1c2a40] p-6 text-center">
+
           <FiAlertCircle
             size={28}
             className="mx-auto text-red-400"
@@ -216,14 +455,11 @@ function FreelancerCollaboration() {
             <FiRefreshCw size={13} />
             Try Again
           </button>
+
         </div>
       </div>
     );
   }
-
-  // ==========================================
-  // Data
-  // ==========================================
 
   const active =
     collaborations?.active || [];
@@ -235,23 +471,25 @@ function FreelancerCollaboration() {
     collaborations?.completed || [];
 
   // ==========================================
-  // ==========================================
   // Collaboration Card
   // ==========================================
-
   const CollaborationCard = ({
     application,
     type,
   }) => {
-    const title = getJobTitle(application);
-    const client = getClientName(application);
-    const avatar = getClientAvatar(application);
+    const title =
+      getJobTitle(application);
+
+    const client =
+      getClientName(application);
+
+    const avatar =
+      getClientAvatar(application);
 
     return (
       <div className="rounded-xl border border-[#26364c] bg-[#1c2a40] p-4 transition hover:border-[#3b4d68]">
 
         {/* Header */}
-
         <div className="flex items-start justify-between gap-3">
 
           <div className="flex min-w-0 items-center gap-3">
@@ -271,6 +509,7 @@ function FreelancerCollaboration() {
             )}
 
             <div className="min-w-0">
+
               <h3 className="truncate text-sm font-semibold text-white">
                 {title}
               </h3>
@@ -278,10 +517,9 @@ function FreelancerCollaboration() {
               <p className="mt-0.5 truncate text-[10px] text-slate-400">
                 Client: {client}
               </p>
+
             </div>
           </div>
-
-          {/* Status */}
 
           {type === "active" && (
             <span className="shrink-0 rounded-full bg-emerald-400/10 px-2.5 py-1 text-[9px] font-medium text-emerald-400">
@@ -300,13 +538,14 @@ function FreelancerCollaboration() {
               Completed
             </span>
           )}
+
         </div>
 
         {/* Details */}
-
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
 
           <div className="rounded-lg border border-[#334258] bg-[#102238] p-2.5">
+
             <p className="text-[8px] uppercase tracking-wide text-slate-500">
               Budget
             </p>
@@ -314,9 +553,11 @@ function FreelancerCollaboration() {
             <p className="mt-1 text-xs font-semibold text-white">
               {getBidAmount(application)}
             </p>
+
           </div>
 
           <div className="rounded-lg border border-[#334258] bg-[#102238] p-2.5">
+
             <p className="text-[8px] uppercase tracking-wide text-slate-500">
               Timeline
             </p>
@@ -324,9 +565,11 @@ function FreelancerCollaboration() {
             <p className="mt-1 truncate text-xs font-semibold text-white">
               {getTimeline(application)}
             </p>
+
           </div>
 
           <div className="col-span-2 rounded-lg border border-[#334258] bg-[#102238] p-2.5 sm:col-span-1">
+
             <p className="text-[8px] uppercase tracking-wide text-slate-500">
               Applied
             </p>
@@ -334,13 +577,15 @@ function FreelancerCollaboration() {
             <p className="mt-1 text-xs font-semibold text-white">
               {getDate(application)}
             </p>
+
           </div>
+
         </div>
 
         {/* Cover Letter */}
-
         {application?.coverLetter && (
           <div className="mt-3 rounded-lg border border-[#334258] bg-[#102238] p-3">
+
             <p className="text-[8px] font-medium uppercase tracking-wide text-slate-500">
               Cover Letter
             </p>
@@ -348,14 +593,15 @@ function FreelancerCollaboration() {
             <p className="mt-1 line-clamp-2 text-[10px] leading-relaxed text-slate-400">
               {application.coverLetter}
             </p>
+
           </div>
         )}
 
         {/* Actions */}
-
         <div className="mt-4 flex items-center justify-between border-t border-[#26364c] pt-3">
 
           <div className="flex items-center gap-1.5">
+
             {type === "active" && (
               <>
                 <FiCheckCircle
@@ -394,24 +640,45 @@ function FreelancerCollaboration() {
                 </span>
               </>
             )}
+
           </div>
 
+          {/* ACTIVE */}
           {type === "active" && (
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 rounded-md bg-violet-500 px-3 py-1.5 text-[9px] font-medium text-white transition hover:bg-violet-600"
-            >
-              Open
-              <FiArrowRight size={11} />
-            </button>
+            <div className="flex items-center gap-2">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedProject(
+                    application
+                  )
+                }
+                className="inline-flex items-center gap-1.5 rounded-md bg-violet-500 px-3 py-1.5 text-[9px] font-medium text-white transition hover:bg-violet-600"
+              >
+                <FiUpload size={11} />
+                Submit
+              </button>
+
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-md border border-[#334258] bg-[#102238] px-3 py-1.5 text-[9px] font-medium text-slate-300 transition hover:text-white"
+              >
+                Open
+                <FiArrowRight size={11} />
+              </button>
+
+            </div>
           )}
 
+          {/* PENDING */}
           {type === "pending" && (
             <span className="text-[9px] text-slate-500">
               Awaiting approval
             </span>
           )}
 
+          {/* COMPLETED */}
           {type === "completed" && (
             <button
               type="button"
@@ -421,6 +688,7 @@ function FreelancerCollaboration() {
               <FiArrowRight size={11} />
             </button>
           )}
+
         </div>
       </div>
     );
@@ -429,7 +697,6 @@ function FreelancerCollaboration() {
   // ==========================================
   // Render
   // ==========================================
-
   return (
     <div className="min-h-full bg-[#07182a] px-3 py-4 text-white sm:px-5">
 
@@ -438,14 +705,13 @@ function FreelancerCollaboration() {
         subtitle="Work with clients through chat, files, video, and progress logs."
       />
 
-      {/* =====================================
-          Summary
-      ====================================== */}
-
+      {/* Summary */}
       <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
 
         <div className="rounded-xl border border-[#26364c] bg-[#1c2a40] p-4">
+
           <div className="flex items-center justify-between">
+
             <div>
               <p className="text-[9px] uppercase tracking-wide text-slate-500">
                 Active
@@ -457,17 +723,24 @@ function FreelancerCollaboration() {
             </div>
 
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-400/10">
+
               <FiBriefcase
                 size={14}
                 className="text-emerald-400"
               />
+
             </div>
+
           </div>
+
         </div>
 
         <div className="rounded-xl border border-[#26364c] bg-[#1c2a40] p-4">
+
           <div className="flex items-center justify-between">
+
             <div>
+
               <p className="text-[9px] uppercase tracking-wide text-slate-500">
                 Pending Requests
               </p>
@@ -475,20 +748,28 @@ function FreelancerCollaboration() {
               <p className="mt-2 text-xl font-semibold text-white">
                 {pending.length}
               </p>
+
             </div>
 
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400/10">
+
               <FiClock
                 size={14}
                 className="text-amber-400"
               />
+
             </div>
+
           </div>
+
         </div>
 
         <div className="rounded-xl border border-[#26364c] bg-[#1c2a40] p-4">
+
           <div className="flex items-center justify-between">
+
             <div>
+
               <p className="text-[9px] uppercase tracking-wide text-slate-500">
                 Completed
               </p>
@@ -496,24 +777,29 @@ function FreelancerCollaboration() {
               <p className="mt-2 text-xl font-semibold text-white">
                 {completed.length}
               </p>
+
             </div>
 
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-300/10">
+
               <FiCheckCircle
                 size={14}
                 className="text-violet-300"
               />
+
             </div>
+
           </div>
+
         </div>
+
       </div>
 
-      {/* =====================================
-          Active Collaborations
-      ====================================== */}
-
+      {/* Active */}
       <section>
+
         <div className="mb-3">
+
           <h2 className="text-base font-semibold text-white">
             Active Collaborations
           </h2>
@@ -521,6 +807,7 @@ function FreelancerCollaboration() {
           <p className="mt-1 text-[10px] text-slate-400">
             Projects that have been accepted by clients.
           </p>
+
         </div>
 
         {active.length === 0 ? (
@@ -531,6 +818,7 @@ function FreelancerCollaboration() {
           />
         ) : (
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+
             {active.map((application) => (
               <CollaborationCard
                 key={application._id}
@@ -538,16 +826,17 @@ function FreelancerCollaboration() {
                 type="active"
               />
             ))}
+
           </div>
         )}
+
       </section>
 
-      {/* =====================================
-          Pending Requests
-      ====================================== */}
-
+      {/* Pending */}
       <section className="mt-6">
+
         <div className="mb-3">
+
           <h2 className="text-base font-semibold text-white">
             Pending Requests
           </h2>
@@ -555,6 +844,7 @@ function FreelancerCollaboration() {
           <p className="mt-1 text-[10px] text-slate-400">
             Applications waiting for client approval.
           </p>
+
         </div>
 
         {pending.length === 0 ? (
@@ -565,6 +855,7 @@ function FreelancerCollaboration() {
           />
         ) : (
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+
             {pending.map((application) => (
               <CollaborationCard
                 key={application._id}
@@ -572,16 +863,17 @@ function FreelancerCollaboration() {
                 type="pending"
               />
             ))}
+
           </div>
         )}
+
       </section>
 
-      {/* =====================================
-          Completed
-      ====================================== */}
-
+      {/* Completed */}
       <section className="mt-6">
+
         <div className="mb-3">
+
           <h2 className="text-base font-semibold text-white">
             Completed Collaborations
           </h2>
@@ -589,6 +881,7 @@ function FreelancerCollaboration() {
           <p className="mt-1 text-[10px] text-slate-400">
             Your successfully completed projects.
           </p>
+
         </div>
 
         {completed.length === 0 ? (
@@ -599,6 +892,7 @@ function FreelancerCollaboration() {
           />
         ) : (
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+
             {completed.map((application) => (
               <CollaborationCard
                 key={application._id}
@@ -606,9 +900,26 @@ function FreelancerCollaboration() {
                 type="completed"
               />
             ))}
+
           </div>
         )}
+
       </section>
+
+      {/* Submission Modal */}
+      {selectedProject && (
+        <SubmissionForm
+          application={selectedProject}
+          onClose={() =>
+            setSelectedProject(null)
+          }
+          onSubmitted={() => {
+            setSelectedProject(null);
+            fetchCollaborations();
+          }}
+        />
+      )}
+
     </div>
   );
 }

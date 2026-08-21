@@ -1,379 +1,987 @@
-import { useEffect, useState } from "react";
-import PageHeader from "../../components/Common/PageHeader";
-import StatusBadge from "../../components/Common/StatusBadge";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Search,
+  Plus,
+  FolderKanban,
+  Clock3,
+  CheckCircle2,
+  FileCheck2,
+  ExternalLink,
+  FileText,
+  Download,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+} from "lucide-react";
 import api from "../../services/api";
 
-const ClientProjects = () => {
+const Projects = () => {
   const [projects, setProjects] = useState([]);
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [expandedProject, setExpandedProject] = useState(null);
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await api.get("/projects/client");
-
-        setProjects(response.data?.projects || response.data || []);
-      } catch (err) {
-        console.error("Failed to fetch client projects:", err);
-
-        setError(
-          err.response?.data?.message ||
-            "Unable to load projects."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProjects();
   }, []);
 
+  // ==========================================
+  // Fetch Client Projects
+  // ==========================================
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await api.get("/applications/projects");
+
+      const data =
+        response.data?.projects ??
+        response.data ??
+        [];
+
+      setProjects(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to fetch projects:", err);
+
+      setError(
+        err.response?.data?.message ||
+          "Unable to load projects."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================================
+  // Search + Filter
+  // ==========================================
+  const filteredProjects = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return projects.filter((project) => {
+      const title =
+        project.job?.title ||
+        "";
+
+      const freelancer =
+        project.freelancer?.name ||
+        "";
+
+      const matchesSearch =
+        !query ||
+        title.toLowerCase().includes(query) ||
+        freelancer.toLowerCase().includes(query);
+
+      const status = getProjectStatus(project);
+
+      const matchesTab =
+        activeTab === "all" ||
+        (activeTab === "in-progress" &&
+          status === "in progress") ||
+        (activeTab === "pending-review" &&
+          status === "pending review") ||
+        (activeTab === "completed" &&
+          status === "completed");
+
+      return matchesSearch && matchesTab;
+    });
+  }, [projects, activeTab, search]);
+
+  // ==========================================
+  // Stats
+  // ==========================================
+  const stats = useMemo(() => {
+    return {
+      total: projects.length,
+
+      active: projects.filter(
+        (project) =>
+          getProjectStatus(project) === "in progress"
+      ).length,
+
+      completed: projects.filter(
+        (project) =>
+          getProjectStatus(project) === "completed"
+      ).length,
+
+      pendingReview: projects.filter(
+        (project) =>
+          getProjectStatus(project) === "pending review"
+      ).length,
+    };
+  }, [projects]);
+
+  // ==========================================
+  // Toggle Project Submission
+  // ==========================================
+  const toggleProject = (projectId) => {
+    setExpandedProject((current) =>
+      current === projectId ? null : projectId
+    );
+  };
+
   return (
-    <div>
-      <PageHeader
-        title="Projects"
-        subtitle="Track project progress, milestones, submissions, files, and deadlines."
-      />
+    <div className="min-h-screen bg-slate-950 text-slate-100">
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        {/* Header */}
-        <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              Active Projects
-            </h2>
+      {/* ==========================================
+          Header
+      ========================================== */}
+      <div className="border-b border-slate-800 bg-slate-950">
+        <div className="mx-auto max-w-[1600px] px-6 py-8 lg:px-10">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 
-            <p className="mt-1 text-sm text-slate-500">
-              {projects.length} Active Projects
-            </p>
+            <div>
+              <p className="mb-2 text-xs font-medium uppercase tracking-[0.25em] text-blue-400">
+                Client Portal
+              </p>
+
+              <h1 className="font-serif text-4xl font-semibold tracking-tight text-white">
+                My Projects
+              </h1>
+
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+                Manage commissions, monitor progress, and review
+                submitted work from your freelancers.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-500"
+            >
+              <Plus size={18} />
+              Create Project
+            </button>
+
           </div>
-
-          <button
-            type="button"
-            className="flex w-fit items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            <span className="material-symbols-outlined text-[20px]">
-              filter_list
-            </span>
-            Filter
-          </button>
         </div>
-
-        {/* Loading */}
-        {loading && (
-          <div className="flex items-center justify-center py-16">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
-          </div>
-        )}
-
-        {/* Error */}
-        {!loading && error && (
-          <div className="px-6 py-10 text-center">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
-
-        {/* Empty */}
-        {!loading && !error && projects.length === 0 && (
-          <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-            <span className="material-symbols-outlined text-5xl text-slate-300">
-              work_outline
-            </span>
-
-            <h3 className="mt-3 text-base font-semibold text-slate-800">
-              No projects found
-            </h3>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Your active projects will appear here.
-            </p>
-          </div>
-        )}
-
-        {/* Desktop Header */}
-        {!loading && !error && projects.length > 0 && (
-          <>
-            <div className="hidden grid-cols-12 gap-4 border-b border-slate-200 bg-slate-50 px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 md:grid">
-              <div className="col-span-4">Project</div>
-              <div className="col-span-2">Freelancer</div>
-              <div className="col-span-1">Pricing</div>
-              <div className="col-span-2">Deadline</div>
-              <div className="col-span-1">Status</div>
-              <div className="col-span-1">Submission</div>
-              <div className="col-span-1 text-right">Action</div>
-            </div>
-
-            <div className="divide-y divide-slate-200">
-              {projects.map((project) => (
-                <div
-                  key={project._id || project.id}
-                  className="grid grid-cols-1 gap-4 px-6 py-5 transition hover:bg-slate-50 md:grid-cols-12 md:items-center"
-                >
-                  {/* Project */}
-                  <div className="md:col-span-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-blue-100 bg-blue-50">
-                        <span className="material-symbols-outlined text-blue-600">
-                          work
-                        </span>
-                      </div>
-
-                      <div className="min-w-0">
-                        <h3 className="truncate text-sm font-semibold text-slate-900">
-                          {project.title || project.name}
-                        </h3>
-
-                        <p className="mt-1 truncate text-sm text-slate-500">
-                          {project.description || "No description available"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Freelancer */}
-                  <div className="md:col-span-2">
-                    <span className="mb-1 block text-xs font-medium text-slate-400 md:hidden">
-                      Freelancer
-                    </span>
-
-                    <span className="text-sm font-medium text-slate-700">
-                      {project.freelancer?.name ||
-                        project.freelancerName ||
-                        "Not assigned"}
-                    </span>
-                  </div>
-
-                  {/* Pricing */}
-                  <div className="md:col-span-1">
-                    <span className="mb-1 block text-xs font-medium text-slate-400 md:hidden">
-                      Pricing
-                    </span>
-
-                    <span className="text-sm font-medium text-slate-700">
-                      {project.budget || project.price
-                        ? `$${project.budget || project.price}`
-                        : "—"}
-                    </span>
-                  </div>
-
-                  {/* Deadline */}
-                  <div className="md:col-span-2">
-                    <span className="mb-1 block text-xs font-medium text-slate-400 md:hidden">
-                      Deadline
-                    </span>
-
-                    <div className="flex items-center gap-1 text-sm text-slate-600">
-                      <span className="material-symbols-outlined text-[18px]">
-                        calendar_month
-                      </span>
-
-                      {project.deadline
-                        ? new Date(project.deadline).toLocaleDateString()
-                        : "—"}
-                    </div>
-                  </div>
-
-                  {/* Status */}
-                  <div className="md:col-span-1">
-                    <span className="mb-1 block text-xs font-medium text-slate-400 md:hidden">
-                      Status
-                    </span>
-
-                    <StatusBadge status={project.status} />
-                  </div>
-
-                  {/* Submission */}
-                  <div className="md:col-span-1">
-                    <span className="mb-1 block text-xs font-medium text-slate-400 md:hidden">
-                      Submission
-                    </span>
-
-                    {project.submissionStatus === "submitted" ? (
-                      <span className="inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
-                        Submitted
-                      </span>
-                    ) : (
-                      <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
-                        Pending
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Action */}
-                  <div className="flex justify-start md:col-span-1 md:justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedProject(project)}
-                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-blue-500 hover:text-blue-600"
-                    >
-                      View
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
       </div>
 
-      {/* Project Details */}
-      {selectedProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900">
-                  {selectedProject.title || selectedProject.name}
-                </h2>
+      {/* ==========================================
+          Main
+      ========================================== */}
+      <main className="mx-auto max-w-[1600px] px-6 py-8 lg:px-10">
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Project Details
-                </p>
-              </div>
+        {/* ==========================================
+            Stats
+        ========================================== */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
-              <button
-                type="button"
-                onClick={() => setSelectedProject(null)}
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-              >
-                <span className="material-symbols-outlined">
-                  close
-                </span>
-              </button>
+          <StatCard
+            label="Total Projects"
+            value={stats.total}
+            icon={FolderKanban}
+          />
+
+          <StatCard
+            label="Active"
+            value={stats.active}
+            icon={Clock3}
+          />
+
+          <StatCard
+            label="Completed"
+            value={stats.completed}
+            icon={CheckCircle2}
+          />
+
+          <StatCard
+            label="Pending Review"
+            value={stats.pendingReview}
+            icon={FileCheck2}
+          />
+
+        </section>
+
+        {/* ==========================================
+            Search + Filters
+        ========================================== */}
+        <section className="mt-10">
+
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+
+            {/* Search */}
+            <div className="relative w-full xl:max-w-md">
+
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+              />
+
+              <input
+                type="text"
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                placeholder="Search project or freelancer..."
+                className="w-full rounded-lg border border-slate-800 bg-slate-900 py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-slate-500 focus:border-blue-500"
+              />
+
             </div>
 
-            <div className="grid gap-5 p-6 md:grid-cols-2">
-              {/* Project Information */}
-              <div className="rounded-xl border border-slate-200 p-5">
-                <h3 className="mb-4 font-semibold text-slate-900">
-                  Project Information
-                </h3>
+            {/* Filters */}
+            <div className="flex flex-wrap gap-2">
 
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-xs text-slate-400">
-                      Description
-                    </p>
-                    <p className="mt-1 text-sm text-slate-700">
-                      {selectedProject.description || "No description"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-400">
-                      Freelancer
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-slate-700">
-                      {selectedProject.freelancer?.name ||
-                        selectedProject.freelancerName ||
-                        "Not assigned"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-400">
-                      Budget
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">
-                      {selectedProject.budget ||
-                      selectedProject.price
-                        ? `$${selectedProject.budget || selectedProject.price}`
-                        : "—"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-400">
-                      Deadline
-                    </p>
-                    <p className="mt-1 text-sm text-slate-700">
-                      {selectedProject.deadline
-                        ? new Date(
-                            selectedProject.deadline
-                          ).toLocaleDateString()
-                        : "—"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Submission */}
-              <div className="rounded-xl border border-slate-200 p-5">
-                <h3 className="mb-4 font-semibold text-slate-900">
-                  Project Submission
-                </h3>
-
-                {selectedProject.submissionStatus === "submitted" ? (
-                  <div>
-                    <div className="rounded-lg bg-slate-50 p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-                          <span className="material-symbols-outlined text-blue-600">
-                            description
-                          </span>
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            Project Submitted
-                          </p>
-
-                          <p className="mt-1 text-xs text-slate-500">
-                            The freelancer has submitted work for review.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex gap-2">
-                      <button
-                        type="button"
-                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                      >
-                        Review Submission
-                      </button>
-
-                      <button
-                        type="button"
-                        className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                      >
-                        Files
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-lg bg-slate-50 px-4 py-10 text-center">
-                    <span className="material-symbols-outlined text-4xl text-slate-300">
-                      hourglass_empty
-                    </span>
-
-                    <p className="mt-3 text-sm text-slate-500">
-                      No submission has been received yet.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end border-t border-slate-200 px-6 py-4">
-              <button
-                type="button"
-                onClick={() => setSelectedProject(null)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              <FilterButton
+                active={activeTab === "all"}
+                onClick={() => setActiveTab("all")}
               >
-                Close
-              </button>
+                All
+              </FilterButton>
+
+              <FilterButton
+                active={activeTab === "in-progress"}
+                onClick={() =>
+                  setActiveTab("in-progress")
+                }
+              >
+                In Progress
+              </FilterButton>
+
+              <FilterButton
+                active={activeTab === "pending-review"}
+                onClick={() =>
+                  setActiveTab("pending-review")
+                }
+              >
+                Pending Review
+              </FilterButton>
+
+              <FilterButton
+                active={activeTab === "completed"}
+                onClick={() =>
+                  setActiveTab("completed")
+                }
+              >
+                Completed
+              </FilterButton>
+
             </div>
           </div>
-        </div>
-      )}
+        </section>
+
+        {/* ==========================================
+            Error
+        ========================================== */}
+        {error && (
+          <div className="mt-6 flex items-center gap-3 rounded-lg border border-red-900/60 bg-red-950/30 p-4 text-sm text-red-300">
+
+            <AlertCircle size={18} />
+
+            <span>{error}</span>
+
+          </div>
+        )}
+
+        {/* ==========================================
+            Loading
+        ========================================== */}
+        {loading ? (
+          <div className="mt-10 grid gap-5">
+
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-64 animate-pulse rounded-xl border border-slate-800 bg-slate-900"
+              />
+            ))}
+
+          </div>
+        ) : filteredProjects.length === 0 ? (
+
+          <EmptyState search={search} />
+
+        ) : (
+
+          <section className="mt-10 grid gap-5">
+
+            {filteredProjects.map((project) => {
+
+              const projectId =
+                project._id || project.id;
+
+              return (
+                <ProjectCard
+                  key={projectId}
+                  project={project}
+                  expanded={
+                    expandedProject === projectId
+                  }
+                  onToggle={() =>
+                    toggleProject(projectId)
+                  }
+                />
+              );
+            })}
+
+          </section>
+        )}
+
+      </main>
     </div>
   );
 };
 
-export default ClientProjects;
+/* ==========================================
+   Stats Card
+========================================== */
+
+const StatCard = ({
+  label,
+  value,
+  icon: Icon,
+}) => {
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+
+      <div className="flex items-start justify-between">
+
+        <div>
+
+          <p className="text-sm text-slate-400">
+            {label}
+          </p>
+
+          <p className="mt-2 text-3xl font-semibold text-white">
+            {value}
+          </p>
+
+        </div>
+
+        <div className="rounded-lg border border-slate-800 bg-slate-950 p-3 text-blue-400">
+          <Icon size={20} />
+        </div>
+
+      </div>
+
+    </div>
+  );
+};
+
+/* ==========================================
+   Project Card
+========================================== */
+
+const ProjectCard = ({
+  project,
+  expanded,
+  onToggle,
+}) => {
+  const title =
+    project.job?.title ||
+    "Untitled Project";
+
+  const freelancer =
+    project.freelancer?.name ||
+    "Freelancer";
+
+  const budget = Number(
+    project.bidAmount ??
+      project.job?.budget ??
+      0
+  );
+
+  const deadline =
+    project.job?.deadline;
+
+  const status =
+    getProjectStatus(project);
+
+  const statusConfig =
+    getStatusConfig(status);
+
+  /*
+    Backend currently does not have a project
+    progress field in the Application response.
+    Therefore we do NOT invent a progress value.
+  */
+  const hasProgress =
+    typeof project.progress === "number";
+
+  const progress =
+    hasProgress
+      ? Math.min(
+          100,
+          Math.max(0, project.progress)
+        )
+      : null;
+
+  return (
+    <article className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/70">
+
+      {/* ==========================================
+          Main Project Information
+      ========================================== */}
+
+      <div className="p-6 lg:p-7">
+
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+
+          <div className="min-w-0 flex-1">
+
+            <div className="flex flex-wrap items-center gap-3">
+
+              <h2 className="font-serif text-2xl font-semibold text-white">
+                {title}
+              </h2>
+
+              <span
+                className={`rounded-full border px-3 py-1 text-xs font-medium ${statusConfig.className}`}
+              >
+                {statusConfig.label}
+              </span>
+
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400">
+
+              <span>
+                Freelancer:{" "}
+                <span className="text-slate-200">
+                  {freelancer}
+                </span>
+              </span>
+
+              <span>
+                Budget:{" "}
+                <span className="font-medium text-slate-200">
+                  {formatINR(budget)}
+                </span>
+              </span>
+
+              <span>
+                Deadline:{" "}
+                <span className="text-slate-200">
+                  {formatDate(deadline)}
+                </span>
+              </span>
+
+            </div>
+
+          </div>
+
+          {/* ==========================================
+              Project Submission Button
+          ========================================== */}
+
+          <ProjectAction
+            project={project}
+            expanded={expanded}
+            onToggle={onToggle}
+          />
+
+        </div>
+
+        {/* ==========================================
+            Progress
+        ========================================== */}
+
+        {hasProgress && (
+          <div className="mt-7">
+
+            <div className="mb-2 flex items-center justify-between text-xs">
+
+              <span className="uppercase tracking-wider text-slate-500">
+                Project Progress
+              </span>
+
+              <span className="font-medium text-slate-300">
+                {progress}%
+              </span>
+
+            </div>
+
+            <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+
+              <div
+                className="h-full rounded-full bg-blue-600 transition-all"
+                style={{
+                  width: `${progress}%`,
+                }}
+              />
+
+            </div>
+
+          </div>
+        )}
+
+      </div>
+
+      {/* ==========================================
+          Submission Panel
+      ========================================== */}
+
+      {expanded && (
+        <SubmissionPanel
+          project={project}
+        />
+      )}
+
+    </article>
+  );
+};
+
+/* ==========================================
+   Project Action
+========================================== */
+
+const ProjectAction = ({
+  project,
+  expanded,
+  onToggle,
+}) => {
+  const status =
+    getProjectStatus(project);
+
+  /*
+    Submission backend is not connected yet.
+    We only show the button for project states
+    that actually exist in the backend.
+  */
+
+  if (
+    status !== "pending review" &&
+    status !== "completed" &&
+    status !== "changes requested"
+  ) {
+    return null;
+  }
+
+  let label = "Project Submission";
+
+  if (status === "pending review") {
+    label = expanded
+      ? "Close Review"
+      : "Review Submission";
+  }
+
+  if (status === "changes requested") {
+    label = "View Revision";
+  }
+
+  if (status === "completed") {
+    label = "View Submission";
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-300 transition hover:border-blue-400 hover:bg-blue-500/20"
+    >
+
+      <FileCheck2 size={17} />
+
+      {label}
+
+      {status === "pending review" &&
+        (expanded ? (
+          <ChevronUp size={16} />
+        ) : (
+          <ChevronDown size={16} />
+        ))}
+
+    </button>
+  );
+};
+
+/* ==========================================
+   Submission Panel
+========================================== */
+
+const SubmissionPanel = ({
+  project,
+}) => {
+  const submission =
+    project.submission || {};
+
+  const files =
+    Array.isArray(submission.files)
+      ? submission.files
+      : [];
+
+  const message =
+    submission.message || "";
+
+  const liveDemo =
+    submission.liveDemoUrl ||
+    submission.liveDemo ||
+    "";
+
+  return (
+    <div className="border-t border-slate-800 bg-slate-950/60 p-6 lg:p-7">
+
+      <div className="mb-6">
+
+        <p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-400">
+          Project Submission
+        </p>
+
+        <h3 className="mt-2 font-serif text-xl font-semibold text-white">
+          Freelancer Delivery
+        </h3>
+
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+
+        {/* ==========================================
+            Files
+        ========================================== */}
+
+        <div>
+
+          <p className="mb-3 text-sm font-semibold text-slate-200">
+            Submitted Files
+          </p>
+
+          {files.length === 0 ? (
+
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-500">
+              No files attached to this submission.
+            </div>
+
+          ) : (
+
+            <div className="space-y-2">
+
+              {files.map((file, index) => {
+
+                const fileUrl =
+                  typeof file === "string"
+                    ? file
+                    : file.url;
+
+                const fileName =
+                  typeof file === "string"
+                    ? file.split("/").pop()
+                    : file.name ||
+                      `Document ${index + 1}`;
+
+                return (
+                  <a
+                    key={
+                      file._id ||
+                      file.id ||
+                      index
+                    }
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900 p-3 transition hover:border-slate-700"
+                  >
+
+                    <span className="flex min-w-0 items-center gap-3">
+
+                      <FileText
+                        size={18}
+                        className="shrink-0 text-blue-400"
+                      />
+
+                      <span className="truncate text-sm text-slate-300">
+                        {fileName}
+                      </span>
+
+                    </span>
+
+                    <Download
+                      size={17}
+                      className="shrink-0 text-slate-500"
+                    />
+
+                  </a>
+                );
+              })}
+
+            </div>
+          )}
+
+        </div>
+
+        {/* ==========================================
+            Live Demo
+        ========================================== */}
+
+        <div>
+
+          <p className="mb-3 text-sm font-semibold text-slate-200">
+            Live Demo
+          </p>
+
+          {liveDemo ? (
+
+            <a
+              href={liveDemo}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900 p-4 transition hover:border-blue-500/50"
+            >
+
+              <span className="flex items-center gap-3 text-sm text-slate-300">
+
+                <ExternalLink
+                  size={18}
+                  className="text-blue-400"
+                />
+
+                Preview submitted work
+
+              </span>
+
+              <ExternalLink
+                size={16}
+                className="text-slate-500"
+              />
+
+            </a>
+
+          ) : (
+
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-500">
+              No live demo link provided.
+            </div>
+
+          )}
+
+        </div>
+
+      </div>
+
+      {/* ==========================================
+          Submission Message
+      ========================================== */}
+
+      <div className="mt-6">
+
+        <p className="mb-3 text-sm font-semibold text-slate-200">
+          Submission Message
+        </p>
+
+        <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">
+
+          {message ? (
+
+            <p className="whitespace-pre-wrap text-sm leading-6 text-slate-400">
+              {message}
+            </p>
+
+          ) : (
+
+            <p className="text-sm text-slate-500">
+              No submission message provided.
+            </p>
+
+          )}
+
+        </div>
+
+      </div>
+
+      {/* ==========================================
+          Review Actions
+      ========================================== */}
+
+      <div className="mt-7 flex flex-col gap-3 border-t border-slate-800 pt-6 sm:flex-row sm:justify-end">
+
+        <button
+          type="button"
+          disabled
+          title="Submission review backend is not connected yet"
+          className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-5 py-3 text-sm font-semibold text-amber-300 opacity-50"
+        >
+          <MessageSquare size={17} />
+          Request Changes
+        </button>
+
+        <button
+          type="button"
+          disabled
+          title="Submission review backend is not connected yet"
+          className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white opacity-50"
+        >
+          <CheckCircle2 size={17} />
+          Approve Submission
+        </button>
+
+      </div>
+
+    </div>
+  );
+};
+
+/* ==========================================
+   Empty State
+========================================== */
+
+const EmptyState = ({ search }) => {
+  return (
+    <div className="mt-10 rounded-xl border border-dashed border-slate-800 bg-slate-900/40 px-6 py-16 text-center">
+
+      <FolderKanban
+        size={38}
+        className="mx-auto text-slate-600"
+      />
+
+      <h3 className="mt-4 font-serif text-xl font-semibold text-white">
+        {search
+          ? "No projects found"
+          : "No projects yet"}
+      </h3>
+
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+        {search
+          ? "Try a different project name or freelancer."
+          : "Projects created and assigned through the platform will appear here."}
+      </p>
+
+    </div>
+  );
+};
+
+/* ==========================================
+   Filter Button
+========================================== */
+
+const FilterButton = ({
+  active,
+  onClick,
+  children,
+}) => {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+        active
+          ? "bg-blue-600 text-white"
+          : "border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+      }`}
+    >
+      {children}
+    </button>
+  );
+};
+
+/* ==========================================
+   Get Project Status
+========================================== */
+
+const getProjectStatus = (project) => {
+  const status = normalizeStatus(
+    project.status
+  );
+
+  /*
+    Current backend uses Application.status:
+    accepted / rejected
+
+    An accepted application represents the
+    client's active project currently.
+  */
+
+  if (status === "accepted") {
+    return "in progress";
+  }
+
+  return status;
+};
+
+/* ==========================================
+   Normalize Status
+========================================== */
+
+const normalizeStatus = (status = "") => {
+  return String(status)
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/-/g, " ");
+};
+
+/* ==========================================
+   Status Config
+========================================== */
+
+const getStatusConfig = (status) => {
+  switch (status) {
+    case "completed":
+      return {
+        label: "Completed",
+        className:
+          "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+      };
+
+    case "pending review":
+      return {
+        label: "Pending Review",
+        className:
+          "border-amber-500/30 bg-amber-500/10 text-amber-300",
+      };
+
+    case "changes requested":
+      return {
+        label: "Changes Requested",
+        className:
+          "border-orange-500/30 bg-orange-500/10 text-orange-300",
+      };
+
+    case "in progress":
+      return {
+        label: "In Progress",
+        className:
+          "border-blue-500/30 bg-blue-500/10 text-blue-300",
+      };
+
+    default:
+      return {
+        label: status || "Unknown",
+        className:
+          "border-slate-700 bg-slate-800/50 text-slate-400",
+      };
+  }
+};
+
+/* ==========================================
+   INR
+========================================== */
+
+const formatINR = (amount) => {
+  if (!Number.isFinite(amount)) {
+    return "₹0";
+  }
+
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+/* ==========================================
+   Date
+========================================== */
+
+const formatDate = (date) => {
+  if (!date) {
+    return "—";
+  }
+
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "—";
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(parsed);
+};
+
+export default Projects;

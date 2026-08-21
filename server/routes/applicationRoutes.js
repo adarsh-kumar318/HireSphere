@@ -1,4 +1,5 @@
 const express = require("express");
+
 const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -10,6 +11,10 @@ const {
   getMyCollaborations,
   getJobApplications,
   updateApplicationStatus,
+  getMyProjects,
+  submitProject,
+  approveSubmission,
+  requestSubmissionChanges,
 } = require("../controllers/applicationController");
 
 // ==========================================
@@ -43,6 +48,16 @@ router.get(
 );
 
 // ==========================================
+// Freelancer - Submit Project
+// ==========================================
+router.post(
+  "/:applicationId/submit",
+  authMiddleware,
+  roleMiddleware("freelancer"),
+  submitProject
+);
+
+// ==========================================
 // Client - View Job Applications
 // ==========================================
 router.get(
@@ -50,6 +65,36 @@ router.get(
   authMiddleware,
   roleMiddleware("client"),
   getJobApplications
+);
+
+// ==========================================
+// Client - My Projects
+// ==========================================
+router.get(
+  "/projects",
+  authMiddleware,
+  roleMiddleware("client"),
+  getMyProjects
+);
+
+// ==========================================
+// Client - Approve Submission
+// ==========================================
+router.patch(
+  "/:applicationId/submission/approve",
+  authMiddleware,
+  roleMiddleware("client"),
+  approveSubmission
+);
+
+// ==========================================
+// Client - Request Submission Changes
+// ==========================================
+router.patch(
+  "/:applicationId/submission/request-changes",
+  authMiddleware,
+  roleMiddleware("client"),
+  requestSubmissionChanges
 );
 
 // ==========================================

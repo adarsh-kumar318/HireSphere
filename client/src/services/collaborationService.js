@@ -4,7 +4,31 @@ import api from "./api";
 // Get Freelancer Collaborations
 // ==========================================
 export const getMyCollaborations = async () => {
-  const { data } = await api.get("/applications/collaborations");
+  const { data } = await api.get(
+    "/applications/collaborations"
+  );
+
+  return data;
+};
+
+// ==========================================
+// Submit Project - Freelancer
+// ==========================================
+export const submitProject = async ({
+  applicationId,
+  message,
+  liveDemoUrl,
+  files,
+}) => {
+  const { data } = await api.post(
+    `/applications/${applicationId}/submit`,
+    {
+      message,
+      liveDemoUrl,
+      files,
+    }
+  );
+
   return data;
 };
 
